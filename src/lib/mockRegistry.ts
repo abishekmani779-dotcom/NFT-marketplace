@@ -27,7 +27,8 @@ export const mockRegistry = [
     gallery: [
       "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?q=80&w=1000&auto=format&fit=crop",
       "/pocket_watch_detail.png"
-    ]
+    ],
+    model3d: "/pocket_watch.glb"
   },
   {
     id: "asset-003",

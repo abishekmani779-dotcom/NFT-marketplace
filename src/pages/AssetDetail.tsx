@@ -8,6 +8,7 @@ import { PriceHistorySparkline } from '../components/ui/PriceHistorySparkline';
 import { PageTransition } from '../components/PageTransition';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TransactionEscrowFlow } from '../components/ui/TransactionEscrowFlow';
+import '@google/model-viewer';
 
 function VerificationBadge({ level }: { level: number }) {
   if (level === 3) {
@@ -73,6 +74,7 @@ export default function AssetDetail() {
   const [isOfferOpen, setIsOfferOpen] = useState(false);
   const [offerValue, setOfferValue] = useState('');
   const [selectedImage, setSelectedImage] = useState(asset.image);
+  const [is3DActive, setIs3DActive] = useState(false);
 
   // Reset selected image when route changes
   useEffect(() => {
@@ -127,21 +129,59 @@ export default function AssetDetail() {
             <div className="space-y-4">
               <div className="aspect-[4/3] bg-obsidian-950 border border-obsidian-800 rounded-2xl overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.5)] group isolation-auto">
                 <AnimatePresence mode="wait">
-                  <motion.img 
-                    key={selectedImage}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                    src={selectedImage} 
-                    alt={asset.title} 
-                    className="w-full h-full object-cover transform transition-transform duration-[6s] group-hover:scale-[1.03]"
-                  />
+                  {is3DActive && asset.model3d ? (
+                    <motion.div
+                      key="3d-viewer"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="w-full h-full bg-obsidian-950"
+                    >
+                      <model-viewer
+                        src={asset.model3d}
+                        alt={`3D model of ${asset.title}`}
+                        camera-controls
+                        auto-rotate
+                        shadow-intensity="1"
+                        exposure="0.5"
+                        environment-image="neutral"
+                        style={{ width: '100%', height: '100%', '--poster-color': 'transparent' } as any}
+                        className="w-full h-full"
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.img 
+                      key={selectedImage}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                      src={selectedImage} 
+                      alt={asset.title} 
+                      className="w-full h-full object-cover transform transition-transform duration-[6s] group-hover:scale-[1.03]"
+                    />
+                  )}
                 </AnimatePresence>
                 
                 <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
                   <VerificationBadge level={asset.verificationLevel} />
                 </div>
+
+                {asset.model3d && (
+                  <div className="absolute top-6 right-6 z-20">
+                    <button
+                      onClick={() => setIs3DActive(!is3DActive)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md transition-all duration-300 font-sans text-xs uppercase tracking-widest font-bold shadow-lg ${
+                        is3DActive 
+                          ? 'bg-gold-500 text-obsidian-950 border-gold-400 shadow-[0_0_20px_rgba(212,175,55,0.4)]' 
+                          : 'bg-obsidian-900/60 text-gold-400 border-gold-500/30 hover:bg-gold-500/10'
+                      }`}
+                    >
+                      <Activity className={`w-3.5 h-3.5 ${is3DActive ? 'animate-pulse' : ''}`} />
+                      {is3DActive ? 'Exit 3D View' : 'View in 3D'}
+                    </button>
+                  </div>
+                )}
 
                 <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-obsidian-950 via-obsidian-950/40 to-transparent pointer-events-none" />
               </div>
