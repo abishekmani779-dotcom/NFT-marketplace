@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────
+   CSS Custom Properties — Theme Variables
+   ───────────────────────────────────────── */
+:root {
+  /* Dark Mode (default) — Digital Vault */
+  --color-bg-primary:    #0A0A0A;
+  --color-bg-secondary:  #0f0f0f;
+  --color-bg-surface:    rgba(15, 15, 15, 0.60);
+  --color-bg-overlay:    rgba(10, 10, 10, 0.90);
+  --color-text-primary:  #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted:    #64748b;
+  --color-border:        rgba(30, 30, 30, 0.80);
+  --color-border-subtle: rgba(20, 20, 20, 0.60);
+  --color-gold:          #D4AF37;
+  --color-gold-glow:     rgba(212, 175, 55, 0.35);
+  --color-gold-glow-lg:  rgba(212, 175, 55, 0.55);
+  --color-shadow-card:   0 8px 32px 0 rgba(0,0,0,0.4);
+  --color-scrollbar-track: #000000;
+  --color-scrollbar-thumb: #0a0a0a;
+
+  --chart-grid:          #1e293b;
+  --chart-tooltip-bg:    #0f172a;
+  --chart-tooltip-border: #334155;
+  --chart-text:          #64748b;
+}
+
+/* Light Mode — Museum Gallery */
+.light {
+  --color-bg-primary:    #F5F5F0;
+  --color-bg-secondary:  #EEEDE6;
+  --color-bg-surface:    rgba(255, 255, 255, 0.72);
+  --color-bg-overlay:    rgba(245, 245, 240, 0.95);
+  --color-text-primary:  #1E293B;
+  --color-text-secondary: #475569;
+  --color-text-muted:    #94A3B8;
+  --color-border:        rgba(200, 196, 180, 0.70);
+  --color-border-subtle: rgba(212, 208, 192, 0.50);
+  --color-gold:          #b8861b;
+  --color-gold-glow:     rgba(184, 134, 27, 0.20);
+  --color-gold-glow-lg:  rgba(184, 134, 27, 0.35);
+  --color-shadow-card:   0 8px 32px 0 rgba(180, 160, 100, 0.12);
+  --color-scrollbar-track: #EEEDE6;
+  --color-scrollbar-thumb: #D8D5C8;
+
+  --chart-grid:          #e2e0d8;
+  --chart-tooltip-bg:    #ffffff;
+  --chart-tooltip-border: #d8d5c8;
+  --chart-text:          #64748b;
+}
+
+/* ──────────────────────────────────
+   Global Smooth Theme Transition
+   ────────────────────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 500ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Exclude animations/transforms from the blanket transition */
+img, video, svg *, [class*="animate-"], [class*="framer-"] {
+  transition-property: none;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    @apply font-sans selection:bg-gold-500 selection:text-white min-h-screen text-sm;
+    background-image: radial-gradient(circle at center, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-primary);
+    @apply font-serif font-medium tracking-tight;
+  }
+
+  /* ── The Digital Vault Glass (Dark) / Gallery Panel (Light) ── */
+  .vault-glass {
+    background-color: var(--color-bg-surface);
+    border-color: var(--color-border);
+    box-shadow: var(--color-shadow-card);
+    @apply backdrop-blur-xl border hover:shadow-none transition-all duration-500;
+  }
+
+  .dark .vault-glass {
+    @apply hover:shadow-[0_8px_32px_rgba(212,175,55,0.06)];
+  }
+
+  .light .vault-glass {
+    @apply hover:shadow-[0_8px_32px_rgba(184,134,27,0.10)];
+  }
+
+  /* ── Primary Button ── */
+  .primary-btn {
+    @apply px-4 py-2 bg-gradient-to-r from-gold-600 to-gold-500 hover:from-gold-500 hover:to-gold-400 text-obsidian-950 font-semibold rounded-sm transition-all shadow-lg hover:shadow-gold-500/30 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  /* ── Secondary Button ── */
+  .secondary-btn {
+    background-color: var(--color-bg-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+    @apply px-4 py-2 border font-medium rounded-sm flex items-center justify-center gap-2 active:scale-95;
+  }
+
+  .dark .secondary-btn {
+    @apply hover:bg-obsidian-800 hover:border-gold-500/50 transition-all;
+  }
+
+  .light .secondary-btn {
+    @apply hover:bg-parchment-300 hover:border-gold-600/50 transition-all;
+  }
+
+  /* ── Input Field ── */
+  .input-field {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+    @apply w-full border rounded-sm px-4 py-2.5 placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all shadow-inner;
+  }
+
+  .dark .input-field {
+    @apply focus:border-gold-500/50 focus:ring-gold-500/50;
+  }
+
+  .light .input-field {
+    @apply focus:border-gold-600/60 focus:ring-gold-600/40;
+  }
+
+  /* ── Plaque Border ── */
+  .plaque-border {
+    @apply border rounded-sm shadow-inner;
+    border-color: var(--color-border);
+  }
+
+  /* ── Verified Badge: vibrant gold glow in dark, metallic matte in light ── */
+  .badge-verified {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .dark .badge-verified {
+    @apply bg-gold-500/15 text-gold-400 border border-gold-500/40;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.25), 0 0 20px rgba(212, 175, 55, 0.10);
+  }
+
+  .light .badge-verified {
+    background: linear-gradient(135deg, #c49a1e 0%, #987118 50%, #c49a1e 100%);
+    background-size: 200% 200%;
+    @apply text-white border border-gold-700/60;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.25), 0 1px 3px rgba(150, 110, 20, 0.25);
+  }
+}
+
+/* ─────────────────────────────────
+   Navbar Theme Variants
+   ───────────────────────────────── */
+.light .nav-scrolled {
+  background-color: rgba(245, 245, 240, 0.92);
+  border-color: rgba(200, 196, 180, 0.60);
+  box-shadow: 0 4px 30px rgba(180, 160, 100, 0.10);
+}
+
+.light .nav-top {
+  background-color: rgba(245, 245, 240, 0.50);
+  border-color: rgba(200, 196, 180, 0.30);
+}
+
+/* ─────────────────────────────────
+   Chart Theme CSS Variables
+   (consumed by Recharts components)
+   ───────────────────────────────── */
+.recharts-cartesian-grid line {
+  stroke: var(--chart-grid) !important;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: var(--chart-tooltip-bg) !important;
+  border-color: var(--chart-tooltip-border) !important;
+}
+
+/* ─────────────────────────────
+   Custom Scrollbar
+   ─────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+/* ─────────────────────────────────────
+   Theme Preview Card Specific Styles
+   ───────────────────────────────────── */
+.theme-preview-dark {
+  background: #0A0A0A;
+  border: 1px solid #1a1a1a;
+}
+
+.theme-preview-light {
+  background: #F5F5F0;
+  border: 1px solid #D8D5C8;
+}
