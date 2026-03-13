@@ -137,17 +137,22 @@ export default function AssetDetail() {
                       exit={{ opacity: 0 }}
                       className="w-full h-full bg-obsidian-950"
                     >
-                      <model-viewer
-                        src={asset.model3d}
-                        alt={`3D model of ${asset.title}`}
-                        camera-controls
-                        auto-rotate
-                        shadow-intensity="1"
-                        exposure="0.5"
-                        environment-image="neutral"
-                        style={{ width: '100%', height: '100%', '--poster-color': 'transparent' } as any}
-                        className="w-full h-full"
-                      />
+                      {(() => {
+                        const ModelViewer = 'model-viewer' as any;
+                        return (
+                          <ModelViewer
+                            src={asset.model3d}
+                            alt={`3D model of ${asset.title}`}
+                            camera-controls
+                            auto-rotate
+                            shadow-intensity="1"
+                            exposure="0.5"
+                            environment-image="neutral"
+                            style={{ width: '100%', height: '100%', '--poster-color': 'transparent' } as any}
+                            className="w-full h-full"
+                          />
+                        );
+                      })()}
                     </motion.div>
                   ) : (
                     <motion.img 
