@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle, ShieldCheck, MapPin, Box, ArrowRight, ExternalLink, Download } from 'lucide-react';
 
@@ -28,10 +29,21 @@ export function TransactionEscrowFlow({ isOpen, onClose, asset }: Props) {
     }
   }, [step, isOpen]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -45,15 +57,15 @@ export function TransactionEscrowFlow({ isOpen, onClose, asset }: Props) {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-lg bg-obsidian-900 border border-obsidian-700 rounded-xl shadow-2xl overflow-hidden vault-glass"
+        className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-obsidian-900 border border-obsidian-700 rounded-xl shadow-2xl overflow-hidden vault-glass m-auto"
       >
-        <div className="p-6 border-b border-obsidian-800 flex justify-between items-center">
+        <div className="p-4 sm:p-6 border-b border-obsidian-800 flex justify-between items-center shrink-0">
           <h2 className="text-xl font-serif text-slate-50 flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-gold-500" /> Secure Escrow Processing
           </h2>
         </div>
 
-        <div className="p-8">
+        <div className="p-4 sm:p-8 overflow-y-auto custom-scroll">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div 
@@ -188,6 +200,7 @@ export function TransactionEscrowFlow({ isOpen, onClose, asset }: Props) {
           </AnimatePresence>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }

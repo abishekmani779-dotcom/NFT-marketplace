@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Wallet, ShieldCheck, UserCircle, Menu, X, Coins,
   Vault, ChevronDown, LogOut, Loader2, Award, Hexagon, BarChart2, LayoutDashboard, Gavel
@@ -7,7 +7,7 @@ import {
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CommandMenu } from './CommandMenu';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 type WalletType = 'MetaMask' | 'Coinbase Wallet' | 'Phantom' | null;
 
@@ -18,79 +18,6 @@ const WALLET_ICONS: Record<string, string> = {
 };
 
 /* ── Animated Sun / Moon Toggle Button ── */
-function ThemeToggle() {
-  const { isDark, toggleTheme } = useTheme();
-
-  return (
-    <motion.button
-      id="theme-toggle-btn"
-      onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className={cn(
-        'relative w-9 h-9 flex items-center justify-center rounded-lg border backdrop-blur-md transition-colors duration-500',
-        isDark
-          ? 'bg-obsidian-900/60 border-obsidian-700 hover:border-gold-500/50 hover:bg-obsidian-800/70'
-          : 'bg-white/50 border-parchment-500/60 hover:border-gold-600/60 hover:bg-white/70 shadow-sm'
-      )}
-      whileTap={{ scale: 0.88 }}
-      whileHover={{ scale: 1.05 }}
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        {isDark ? (
-          /* Moon — shown in dark mode */
-          <motion.svg
-            key="moon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-gold-400"
-            initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
-            animate={{ rotate: 0,   opacity: 1, scale: 1 }}
-            exit={{   rotate: 90,  opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.35, ease: 'easeInOut' }}
-          >
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </motion.svg>
-        ) : (
-          /* Sun — shown in light mode */
-          <motion.svg
-            key="sun"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-gold-600"
-            initial={{ rotate: 90,  opacity: 0, scale: 0.6 }}
-            animate={{ rotate: 0,   opacity: 1, scale: 1 }}
-            exit={{   rotate: -90, opacity: 0, scale: 0.6 }}
-            transition={{ duration: 0.35, ease: 'easeInOut' }}
-          >
-            <circle cx="12" cy="12" r="5" />
-            <line x1="12" y1="1"  x2="12" y2="3" />
-            <line x1="12" y1="21" x2="12" y2="23" />
-            <line x1="4.22"  y1="4.22"  x2="5.64"  y2="5.64" />
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-            <line x1="1"  y1="12" x2="3"  y2="12" />
-            <line x1="21" y1="12" x2="23" y2="12" />
-            <line x1="4.22"  y1="19.78" x2="5.64"  y2="18.36" />
-            <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22" />
-          </motion.svg>
-        )}
-      </AnimatePresence>
-    </motion.button>
-  );
-}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,8 +27,10 @@ export default function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const { isDark } = useTheme();
+  const isDark = true;
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -135,8 +64,7 @@ export default function Navbar() {
   };
 
   const handleDisconnect = () => {
-    setWalletStatus('disconnected');
-    setSelectedWallet(null);
+    logout();
     setIsProfileDropdownOpen(false);
   };
 
@@ -285,13 +213,10 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-3">
               <CommandMenu />
 
-              {/* Theme Toggle */}
-              <ThemeToggle />
-
               {/* Vertical divider */}
               <div className={cn('w-px h-6', dividerClass)} />
 
-              {walletStatus === 'connected' ? (
+              {isAuthenticated ? (
                 <div className="flex items-center gap-2">
                   {/* Balance pill */}
                   <div className={cn('flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm', balancePillClass)}>
@@ -312,10 +237,12 @@ export default function Navbar() {
                     >
                       <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm shrink-0" />
                       <div className="flex flex-col items-start leading-none">
-                        <span className={cn('text-[10px] font-mono', isDark ? 'text-slate-500' : 'text-slate2-500')}>0x8A2…c41F</span>
+                        <span className={cn('text-[10px] font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px]', isDark ? 'text-slate-500' : 'text-slate2-500')}>
+                          {user?.name || '0x8A2…c41F'}
+                        </span>
                         <div className="flex items-center gap-1 mt-0.5">
                           <Award className="w-2.5 h-2.5 text-gold-500" />
-                          <span className="text-[10px] font-semibold text-gold-500">Elite Collector</span>
+                          <span className="text-[10px] font-semibold text-gold-500 capitalize">{user?.role || 'Elite'} Collector</span>
                         </div>
                       </div>
                       <ChevronDown className={cn(
@@ -342,10 +269,10 @@ export default function Navbar() {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md" />
                               <div>
-                                <p className={cn('text-xs font-mono', dropdownTextMuted)}>0x8A2345…c41F</p>
+                                <p className={cn('text-xs font-mono font-semibold', dropdownTextMain)}>{user?.name || '0x8A2345…c41F'}</p>
                                 <div className="flex items-center gap-1 mt-1">
-                                  <span className={cn('text-[10px]', dropdownSubText)}>via</span>
-                                  <span className={cn('text-xs font-semibold', dropdownTextMain)}>{selectedWallet}</span>
+                                  <span className={cn('text-[10px]', dropdownSubText)}>Role:</span>
+                                  <span className={cn('text-xs font-semibold capitalize', dropdownTextMain)}>{user?.role || 'User'}</span>
                                 </div>
                               </div>
                             </div>
@@ -364,16 +291,16 @@ export default function Navbar() {
                           {/* Menu items */}
                           <div className="py-1.5">
                             {[
-                              { icon: UserCircle, label: 'Profile Details',  desc: 'View your collector profile' },
-                              { icon: ShieldCheck, label: 'KYC Verified',    desc: 'Identity confirmed ✓', color: 'text-green-500' },
-                            ].map(({ icon: Icon, label, desc, color }) => (
-                              <button key={label} className={cn('w-full text-left px-4 py-2.5 transition-colors flex items-start gap-3 group', dropdownMenuItemHover)}>
+                              { icon: UserCircle, label: 'Profile Details',  desc: 'View your collector profile', path: '/profile' },
+                              { icon: ShieldCheck, label: 'KYC Verified',    desc: 'Identity confirmed ✓', color: 'text-green-500', path: '/auth' },
+                            ].map(({ icon: Icon, label, desc, color, path }) => (
+                              <Link to={path} key={label} onClick={() => setIsProfileDropdownOpen(false)} className={cn('w-full text-left px-4 py-2.5 transition-colors flex items-start gap-3 group', dropdownMenuItemHover)}>
                                 <Icon className={cn('w-4 h-4 mt-0.5 transition-colors shrink-0 group-hover:text-gold-500', color ?? (isDark ? 'text-slate-500' : 'text-slate2-500'))} />
                                 <div>
                                   <p className={cn('text-sm group-hover:text-gold-600', dropdownTextMain)}>{label}</p>
                                   <p className={cn('text-[10px]', dropdownSubText)}>{desc}</p>
                                 </div>
-                              </button>
+                              </Link>
                             ))}
                           </div>
 
@@ -383,7 +310,7 @@ export default function Navbar() {
                               className="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-red-50/50 dark:hover:bg-red-950/30 flex items-center gap-3 group"
                             >
                               <LogOut className="w-4 h-4 text-red-500/60 group-hover:text-red-400 transition-colors" />
-                              <span className="text-red-400/80 group-hover:text-red-400">Disconnect Wallet</span>
+                              <span className="text-red-400/80 group-hover:text-red-400">Secure Logout</span>
                             </button>
                           </div>
                         </motion.div>
@@ -393,18 +320,17 @@ export default function Navbar() {
                 </div>
               ) : (
                 <button
-                  onClick={() => setIsWalletModalOpen(true)}
+                  onClick={() => navigate('/auth')}
                   className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold-600 to-gold-500 hover:from-gold-500 hover:to-gold-400 text-white font-semibold text-sm rounded-lg transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] hover:shadow-[0_0_25px_rgba(212,175,55,0.35)] active:scale-95"
                 >
-                  <Wallet className="w-4 h-4" />
-                  Connect Wallet
+                  <UserCircle className="w-4 h-4" />
+                  Sign In
                 </button>
               )}
             </div>
 
-            {/* ── Mobile Row: Theme Toggle + Hamburger ── */}
+            {/* ── Mobile Row: Hamburger ── */}
             <div className="lg:hidden flex items-center gap-2">
-              <ThemeToggle />
               <button
                 className={cn('transition-colors p-2', isDark ? 'text-slate-300 hover:text-gold-400' : 'text-slate2-700 hover:text-gold-600')}
                 onClick={() => setIsOpen(!isOpen)}
@@ -442,15 +368,15 @@ export default function Navbar() {
               </div>
 
               <div className={cn('px-4 pb-4 border-t pt-4', mobileFooterBorder)}>
-                {walletStatus === 'connected' ? (
+                {isAuthenticated ? (
                   <div className="space-y-3">
                     <div className={cn('flex items-center gap-3 px-4 py-3 rounded-lg border', mobileWalletCard)}>
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0" />
                       <div>
-                        <p className={cn('text-xs font-mono', isDark ? 'text-slate-400' : 'text-slate2-500')}>0x8A2…c41F</p>
+                        <p className={cn('text-xs font-mono font-semibold', isDark ? 'text-slate-100' : 'text-slate2-800')}>{user?.name || '0x8A2…c41F'}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <Award className="w-3 h-3 text-gold-500" />
-                          <span className="text-xs text-gold-500 font-semibold">Elite · 14.2 ETH</span>
+                          <span className="text-xs text-gold-500 font-semibold capitalize">{user?.role || 'Elite'} · 14.2 ETH</span>
                         </div>
                       </div>
                     </div>
@@ -458,15 +384,15 @@ export default function Navbar() {
                       onClick={handleDisconnect}
                       className="w-full py-2.5 text-sm text-red-400 border border-red-900/50 rounded-lg bg-red-950/20 flex items-center justify-center gap-2 hover:bg-red-950/40 transition-colors"
                     >
-                      <LogOut className="w-4 h-4" /> Disconnect
+                      <LogOut className="w-4 h-4" /> Sign Out
                     </button>
                   </div>
                 ) : (
                   <button
-                    onClick={() => { setIsOpen(false); setIsWalletModalOpen(true); }}
+                    onClick={() => { setIsOpen(false); navigate('/auth'); }}
                     className="w-full py-3 bg-gradient-to-r from-gold-600 to-gold-500 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:from-gold-500 hover:to-gold-400 active:scale-95 transition-all"
                   >
-                    <Wallet className="w-4 h-4" /> Connect Wallet
+                    <UserCircle className="w-4 h-4" /> Sign In
                   </button>
                 )}
               </div>

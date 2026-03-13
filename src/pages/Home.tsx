@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { motion, useInView, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import {
   ArrowRight, Shield, Anchor, Lock, Hexagon, ShieldCheck,
@@ -52,6 +52,37 @@ function FadeSection({ children, className = '' }: { children: React.ReactNode; 
   );
 }
 
+// ─── MagneticWrapper ──────────────────────────────────────────
+function MagneticWrapper({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current!.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    setPosition({ x: middleX * 0.2, y: middleY * 0.2 });
+  };
+
+  const reset = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      animate={{ x: position.x, y: position.y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className="inline-block"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 // ─── Hero slides ──────────────────────────────────────────────
 const heroSlides = mockRegistry.slice(0, 4).map(item => ({
   ...item,
@@ -65,6 +96,15 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  // Stepper state
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+  const stepperRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: stepperRef,
+    offset: ["start center", "end center"]
+  });
+  const lineWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   // Auto-advance
   useEffect(() => {
@@ -103,10 +143,10 @@ export default function Home() {
   ];
 
   const steps = [
-    { number: '01', title: 'Submit Your Artifact', desc: 'Upload documentation, provenance records, and high-resolution imagery through our Seller Portal.', icon: Landmark },
-    { number: '02', title: 'Oracle Appraisal', desc: 'Our AI Oracle and global network of expert appraisers verify authenticity, condition, and market value.', icon: Shield },
-    { number: '03', title: 'Physical Vaulting', desc: 'The artifact is collected from you and secured in a partner vault. An NFC chip is embedded and linked.', icon: Vault },
-    { number: '04', title: 'Mint & List', desc: 'An ERC-721 NFT is minted representing full ownership. You set the floor price and listing terms.', icon: Zap },
+    { number: '01', title: 'Submit Your Artifact', desc: 'Upload documentation, provenance records, and high-resolution imagery through our Seller Portal.', icon: Landmark, time: '10 Min Upload' },
+    { number: '02', title: 'Oracle Appraisal', desc: 'Our AI Oracle and global network of expert appraisers verify authenticity, condition, and market value.', icon: Shield, time: '24h Review' },
+    { number: '03', title: 'Physical Vaulting', desc: 'The artifact is collected from you and secured in a partner vault. An NFC chip is embedded and linked.', icon: Vault, time: '3-5 Days' },
+    { number: '04', title: 'Mint & List', desc: 'An ERC-721 NFT is minted representing full ownership. You set the floor price and listing terms.', icon: Zap, time: 'Instant Mint' },
   ];
 
   const testimonials = [
@@ -478,36 +518,100 @@ export default function Home() {
         </section>
 
         {/* ══════════════════════ HOW IT WORKS ══════════════════════ */}
-        <section className="py-28 bg-obsidian-900 border-t border-obsidian-800 relative overflow-hidden">
+        <section ref={stepperRef} className="py-28 bg-obsidian-900 border-t border-obsidian-800 relative overflow-hidden">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-          <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-[100px] relative z-10">
+          <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-[100px] relative z-10">
             <FadeSection>
-              <motion.div variants={fadeUp} className="text-center mb-20">
+              <motion.div variants={fadeUp} className="text-center mb-28">
                 <p className="text-xs text-gold-500 uppercase tracking-widest font-mono mb-3">The Process</p>
                 <h2 className="text-4xl md:text-5xl font-serif text-slate-50 mb-4">From Estate to Blockchain</h2>
                 <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">A rigorous, four-step pipeline that transforms physical antiques into fully verifiable, liquid digital assets.</p>
               </motion.div>
             </FadeSection>
-            <div className="relative">
-              <div className="hidden md:block absolute top-10 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold-500/20 to-transparent" />
-              <FadeSection className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                {steps.map((step) => (
-                  <motion.div key={step.number} variants={fadeUp} className="relative flex flex-col items-center text-center group">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-obsidian-900 to-obsidian-950 border border-obsidian-700 group-hover:border-gold-500/50 flex items-center justify-center mb-5 shadow-xl transition-all relative z-10 group-hover:shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-                      <step.icon className="w-8 h-8 text-gold-500" />
-                    </div>
-                    <span className="absolute top-2 -right-2 text-[10px] font-mono text-gold-500/60 z-10">{step.number}</span>
-                    <h3 className="font-serif text-lg text-slate-100 mb-2">{step.title}</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed">{step.desc}</p>
-                  </motion.div>
-                ))}
-              </FadeSection>
+
+            <div className="relative mt-12 mb-20 max-md:flex max-md:flex-col max-md:gap-16">
+              {/* Glowing Data Conduit (Track) - Desktop Only */}
+              <div className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-2 bg-obsidian-800/80 rounded-full overflow-hidden backdrop-blur-sm border border-obsidian-700/50" />
+              
+              {/* Animated Progress Line */}
+              <motion.div 
+                className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-2 rounded-full origin-left bg-gradient-to-r from-gold-600 via-gold-400 to-amber-200 shadow-[0_0_20px_rgba(212,175,55,0.8)]"
+                style={{ scaleX: lineWidth }}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 relative z-10 w-full justify-between">
+                {steps.map((step, idx) => {
+                  const isHovered = hoveredStep === idx;
+                  const isAnyHovered = hoveredStep !== null;
+                  const isDimmed = isAnyHovered && !isHovered;
+
+                  return (
+                    <motion.div 
+                      key={step.number} 
+                      initial={{ opacity: 0, y: 50 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-50px" }}
+                      transition={{ duration: 0.6, delay: idx * 0.15, type: 'spring', bounce: 0.4 }}
+                      onMouseEnter={() => setHoveredStep(idx)}
+                      onMouseLeave={() => setHoveredStep(null)}
+                      className="relative flex flex-col items-center text-center group cursor-default"
+                      style={{ opacity: isDimmed ? 0.3 : 1, scale: isHovered ? 1.05 : 1, transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                    >
+                      {/* Outline Background Number */}
+                      <span className="absolute -top-12 md:-top-16 text-8xl md:text-9xl font-bold text-transparent font-serif select-none pointer-events-none transition-all duration-500"
+                            style={{ WebkitTextStroke: '2px rgba(255, 255, 255, 0.03)', zIndex: -1 }}>
+                        {step.number}
+                      </span>
+
+                      {/* Glassmorphism Icon Pod */}
+                      <div className="w-28 h-28 md:w-[120px] md:h-[120px] rounded-full bg-obsidian-900/60 backdrop-blur-xl border border-obsidian-700 group-hover:border-gold-500 flex items-center justify-center mb-6 relative transition-all duration-500 z-10
+                        group-hover:shadow-[0_15px_40px_rgba(212,175,55,0.25)] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
+                      >
+                        {/* Inner glowing circle */}
+                        <div className={`absolute inset-2 rounded-full border border-gold-500/0 group-hover:border-gold-500/30 bg-gradient-to-b from-obsidian-800 to-obsidian-950 transition-all duration-500 ${isHovered ? 'shadow-[inset_0_0_20px_rgba(212,175,55,0.2)]' : ''}`} />
+
+                        {idx === 2 && isHovered && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <motion.div animate={{ scale: [1, 1.8], opacity: [0.6, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }} className="absolute w-12 h-12 rounded-full border border-cyan-500/60" />
+                            <motion.div animate={{ scale: [1, 2.2], opacity: [0.4, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.3, ease: 'easeOut' }} className="absolute w-12 h-12 rounded-full border border-cyan-500/40" />
+                          </div>
+                        )}
+
+                        <step.icon className={`w-8 h-8 md:w-10 md:h-10 relative z-10 transition-colors duration-500 ${isHovered ? 'text-gold-300 drop-shadow-[0_0_15px_rgba(212,175,55,0.8)]' : 'text-gold-500'}`} />
+
+                        {idx === 3 && isHovered && (
+                          <motion.div 
+                            initial={{ x: '-150%', opacity: 0 }}
+                            animate={{ x: '150%', opacity: [0, 1, 0] }}
+                            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 pointer-events-none"
+                            style={{ clipPath: 'circle(50% at 50% 50%)' }}
+                          />
+                        )}
+                      </div>
+                      
+                      {/* Estimate Time Badge */}
+                      <div className="inline-flex items-center justify-center mb-4">
+                        <span className="text-[10px] uppercase font-mono tracking-widest text-green-400 bg-green-900/20 border border-green-500/30 px-3 py-1 rounded-full">{step.time}</span>
+                      </div>
+
+                      <h3 className="font-serif text-xl text-slate-100 mb-2 group-hover:text-gold-300 transition-colors">{step.title}</h3>
+                      <p className="text-slate-400 text-sm leading-relaxed max-w-[260px]">{step.desc}</p>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </div>
-            <FadeSection className="mt-16 text-center">
-              <motion.div variants={fadeUp}>
-                <Link to="/submit" className="primary-btn inline-flex px-10 py-4 text-base rounded-xl">
-                  Submit Your Artifact <ArrowRight className="w-5 h-5 ml-2" />
-                </Link>
+
+            <FadeSection className="mt-20 text-center">
+              <motion.div variants={fadeUp} className="relative inline-block group">
+                <div className="absolute -inset-2 bg-gradient-to-r from-gold-600 to-amber-400 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                
+                <MagneticWrapper>
+                  <Link to="/submit" className="relative primary-btn inline-flex px-10 py-5 text-base rounded-xl bg-obsidian-950 hover:bg-obsidian-900 border border-gold-500/50 shadow-xl">
+                    Submit Your Artifact <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </MagneticWrapper>
               </motion.div>
             </FadeSection>
           </div>
