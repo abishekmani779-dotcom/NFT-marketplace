@@ -164,12 +164,95 @@ export default function Home() {
   ];
 
   const partners = [
-    { name: 'Brinks', desc: 'Global Vault Partner' },
-    { name: 'Malca-Amit', desc: 'Secure Transport' },
-    { name: "Christie's", desc: 'Appraisal Network' },
-    { name: 'Chainlink', desc: 'Price Oracle' },
-    { name: 'Fireblocks', desc: 'Custody Infrastructure' },
-    { name: "Lloyd's", desc: 'Insurance Provider' },
+    {
+      name: 'Brinks',
+      desc: 'Global Vault Partner',
+      logo: (
+        <svg viewBox="0 0 200 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="60" height="60" rx="4" fill="#D4AF37" opacity="0.15"/>
+          <text x="30" y="40" textAnchor="middle" fontFamily="serif" fontSize="28" fontWeight="bold" fill="#D4AF37">B</text>
+          <text x="75" y="38" fontFamily="sans-serif" fontSize="22" fontWeight="700" fill="#e2e8f0" letterSpacing="1">BRINKS</text>
+        </svg>
+      ),
+    },
+    {
+      name: 'Malca-Amit',
+      desc: 'Secure Transport',
+      logo: (
+        <svg viewBox="0 0 220 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="30" r="26" stroke="#94a3b8" strokeWidth="2" fill="none"/>
+          <path d="M18 36L30 20L42 36" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <text x="65" y="38" fontFamily="sans-serif" fontSize="19" fontWeight="700" fill="#e2e8f0" letterSpacing="0.5">MALCA-AMIT</text>
+        </svg>
+      ),
+    },
+    {
+      name: "Christie's",
+      desc: 'Appraisal Network',
+      logo: (
+        <svg viewBox="0 0 220 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="12" width="36" height="36" rx="2" fill="#e11d48" opacity="0.85"/>
+          <text x="22" y="38" textAnchor="middle" fontFamily="serif" fontSize="22" fontWeight="bold" fill="white">C</text>
+          <text x="52" y="35" fontFamily="Georgia, serif" fontSize="20" fontWeight="normal" fill="#f1f5f9" letterSpacing="1">Christie's</text>
+        </svg>
+      ),
+    },
+    {
+      name: 'Chainlink',
+      desc: 'Price Oracle',
+      logo: (
+        <svg viewBox="0 0 200 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="30,6 48,16 48,36 30,46 12,36 12,16" fill="#375BD2" opacity="0.9"/>
+          <text x="30" y="33" textAnchor="middle" fontFamily="sans-serif" fontSize="13" fontWeight="bold" fill="white">CL</text>
+          <text x="62" y="36" fontFamily="sans-serif" fontSize="20" fontWeight="bold" fill="#e2e8f0" letterSpacing="0.5">Chainlink</text>
+        </svg>
+      ),
+    },
+    {
+      name: 'Fireblocks',
+      desc: 'Custody Infrastructure',
+      logo: (
+        <svg viewBox="0 0 220 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M30 8 L46 22 L46 38 L30 52 L14 38 L14 22 Z" fill="#6366f1" opacity="0.9"/>
+          <path d="M22 32 Q30 18 38 32" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+          <circle cx="30" cy="35" r="3" fill="white"/>
+          <text x="60" y="36" fontFamily="sans-serif" fontSize="20" fontWeight="bold" fill="#e2e8f0" letterSpacing="0">Fireblocks</text>
+        </svg>
+      ),
+    },
+    {
+      name: "Lloyd's",
+      desc: 'Insurance Provider',
+      logo: (
+        <svg viewBox="0 0 200 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="8" width="44" height="44" rx="22" fill="#0f172a" stroke="#D4AF37" strokeWidth="2"/>
+          <text x="28" y="36" textAnchor="middle" fontFamily="Georgia, serif" fontSize="17" fontWeight="bold" fill="#D4AF37">L</text>
+          <text x="62" y="34" fontFamily="Georgia, serif" fontSize="22" fontStyle="italic" fill="#e2e8f0">Lloyd's</text>
+          <text x="62" y="50" fontFamily="sans-serif" fontSize="10" fill="#64748b" letterSpacing="2">OF LONDON</text>
+        </svg>
+      ),
+    },
+    {
+      name: 'Ethereum',
+      desc: 'Settlement Layer',
+      logo: (
+        <svg viewBox="0 0 180 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="30,6 42,30 30,36 18,30" fill="#627EEA" opacity="0.9"/>
+          <polygon points="30,40 42,32 30,54 18,32" fill="#627EEA" opacity="0.6"/>
+          <text x="58" y="36" fontFamily="sans-serif" fontSize="20" fontWeight="bold" fill="#e2e8f0">Ethereum</text>
+        </svg>
+      ),
+    },
+    {
+      name: 'Deloitte',
+      desc: 'Audit & Compliance',
+      logo: (
+        <svg viewBox="0 0 190 60" className="h-8 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="14" cy="30" r="8" fill="#86C440"/>
+          <text x="30" y="37" fontFamily="sans-serif" fontSize="22" fontWeight="bold" fill="#e2e8f0" letterSpacing="0.5">Deloitte.</text>
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -787,21 +870,39 @@ export default function Home() {
         </section>
 
         {/* ══════════════════════ PARTNERS ══════════════════════ */}
-        <section className="py-20 border-t border-obsidian-800 bg-obsidian-950">
-          <div className="max-w-[90rem] mx-auto px-6 md:px-10 lg:px-[100px]">
+        <section className="py-20 border-t border-obsidian-800 bg-obsidian-950 overflow-hidden">
+          <div className="max-w-[90rem] mx-auto px-6 md:px-10 lg:px-[100px] mb-10">
             <FadeSection>
-              <motion.div variants={fadeUp} className="text-center mb-12">
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-mono">Institutional Partners & Infrastructure</p>
+              <motion.div variants={fadeUp} className="text-center">
+                <p className="text-xs text-slate-500 uppercase tracking-widest font-mono">Institutional Partners &amp; Infrastructure</p>
               </motion.div>
             </FadeSection>
-            <FadeSection className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-              {partners.map((p) => (
-                <motion.div key={p.name} variants={fadeUp} className="flex flex-col items-center justify-center gap-2 p-5 rounded-xl border border-obsidian-800 hover:border-gold-500/20 bg-obsidian-900/40 hover:bg-obsidian-900 transition-all group">
-                  <span className="font-serif text-lg text-slate-300 group-hover:text-gold-400 transition-colors font-semibold">{p.name}</span>
-                  <span className="text-[10px] text-slate-600 uppercase tracking-wider font-mono text-center">{p.desc}</span>
-                </motion.div>
+          </div>
+          {/* Infinite Ticker */}
+          <div
+            className="relative w-full"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+            }}
+          >
+            <motion.div
+              animate={{ x: ['0%', '-50%'] }}
+              transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+              className="flex items-center gap-0 whitespace-nowrap"
+            >
+              {[...partners, ...partners].map((p, i) => (
+                <div
+                  key={i}
+                  className="inline-flex flex-col items-center justify-center gap-3 px-12 py-6 border-r border-obsidian-800 group hover:bg-obsidian-900/60 transition-colors cursor-default shrink-0"
+                >
+                  <div className="opacity-50 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0">
+                    {p.logo}
+                  </div>
+                  <span className="text-[9px] text-slate-600 uppercase tracking-[0.2em] font-mono group-hover:text-slate-400 transition-colors">{p.desc}</span>
+                </div>
               ))}
-            </FadeSection>
+            </motion.div>
           </div>
         </section>
 

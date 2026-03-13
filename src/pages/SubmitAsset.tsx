@@ -1,13 +1,246 @@
-import React, { useState } from 'react';
-import { Camera, FileText, CheckCircle2, ChevronRight, ChevronLeft, ShieldCheck, DollarSign, Fingerprint, Box, MapPin, Scale } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
+import { Camera, FileText, CheckCircle2, ChevronRight, ChevronLeft, ShieldCheck, DollarSign, Fingerprint, Box, MapPin, Scale, Loader2, Zap, ExternalLink, Copy, X, ClipboardCheck } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageTransition } from '../components/PageTransition';
 
+/* ─────────────────────────────────────────
+   Mint stages
+   ───────────────────────────────────────── */
+type MintStage = 'idle' | 'signing' | 'broadcasting' | 'confirming' | 'success';
+
+const MOCK_TX_HASH = '0x4f9a2b3c1d8e7f06a5b4c3d2e1f09876543210abcdef1234567890abcdef1234';
+const MOCK_TOKEN_ID = `#${Math.floor(Math.random() * 9000 + 1000)}`;
+
+const STAGES: { key: MintStage; label: string; desc: string }[] = [
+  { key: 'signing',      label: 'Awaiting Signature',     desc: 'Sign the transaction in your wallet…' },
+  { key: 'broadcasting', label: 'Broadcasting to Network', desc: 'Propagating tx to Ethereum nodes…' },
+  { key: 'confirming',   label: 'Block Confirmation',      desc: 'Waiting for 3 block confirmations…' },
+  { key: 'success',      label: 'Minted Successfully',     desc: 'Your artifact is now on-chain!' },
+];
+
+/* ─────────────────────────────────────────
+   Mint Modal
+   ───────────────────────────────────────── */
+function MintModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const navigate = useNavigate();
+  const [stage, setStage] = useState<MintStage>('idle');
+  const [blocks, setBlocks] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  /* Advance through stages automatically once open */
+  useEffect(() => {
+    if (!isOpen) { setStage('idle'); setBlocks(0); return; }
+
+    setStage('signing');
+    const t1 = setTimeout(() => setStage('broadcasting'), 1800);
+    const t2 = setTimeout(() => setStage('confirming'),   3400);
+    // Increment block counter during confirming
+    let b = 0;
+    const interval = setInterval(() => {
+      if (b < 3) { b++; setBlocks(b); }
+    }, 700);
+    const t3 = setTimeout(() => { setStage('success'); clearInterval(interval); }, 5800);
+
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearInterval(interval); };
+  }, [isOpen]);
+
+  const stageIdx = STAGES.findIndex(s => s.key === stage);
+  const currentStage = STAGES[stageIdx] ?? STAGES[0];
+  const isComplete = stage === 'success';
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(MOCK_TX_HASH);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-obsidian-950/85 backdrop-blur-md"
+            onClick={isComplete ? onClose : undefined}
+          />
+
+          {/* Panel */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 20 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            className="relative w-full max-w-[440px] bg-obsidian-950 border border-obsidian-700 rounded-2xl overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.7)]"
+          >
+            {/* Top gold bar */}
+            <div className="h-[2px] bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+
+            <div className="p-7">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-serif text-slate-50">
+                    {isComplete ? '🏺 Artifact Minted!' : 'Minting to Vault…'}
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {isComplete ? 'Your RWA token is now on the blockchain.' : 'Do not close this window.'}
+                  </p>
+                </div>
+                {isComplete && (
+                  <button onClick={onClose} className="w-8 h-8 rounded-lg bg-obsidian-800 hover:bg-obsidian-700 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Stage progress bar */}
+              <div className="flex items-center gap-1.5 mb-7">
+                {STAGES.map((s, i) => (
+                  <div
+                    key={s.key}
+                    className={cn(
+                      'flex-1 h-1 rounded-full transition-all duration-500',
+                      i < stageIdx || isComplete
+                        ? 'bg-gold-500'
+                        : i === stageIdx
+                        ? 'bg-gold-500/50 animate-pulse'
+                        : 'bg-obsidian-800'
+                    )}
+                  />
+                ))}
+              </div>
+
+              {/* Stage Cards */}
+              <div className="space-y-2.5 mb-6">
+                {STAGES.map((s, i) => {
+                  const done = i < stageIdx || isComplete;
+                  const active = i === stageIdx && !isComplete;
+                  return (
+                    <div
+                      key={s.key}
+                      className={cn(
+                        'flex items-center gap-4 px-4 py-3 rounded-xl border transition-all duration-300',
+                        done   ? 'bg-gold-900/10 border-gold-500/20'
+                               : active ? 'bg-obsidian-900 border-obsidian-700 shadow-[0_0_16px_rgba(212,175,55,0.06)]'
+                               : 'bg-obsidian-900/40 border-obsidian-800 opacity-40'
+                      )}
+                    >
+                      {/* Icon */}
+                      <div className={cn(
+                        'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
+                        done   ? 'bg-gold-500/20'
+                               : active ? 'bg-obsidian-800'
+                               : 'bg-obsidian-900'
+                      )}>
+                        {done
+                          ? <CheckCircle2 className="w-4 h-4 text-gold-400" />
+                          : active
+                          ? <Loader2 className="w-4 h-4 text-gold-400 animate-spin" />
+                          : <div className="w-2 h-2 rounded-full bg-obsidian-600" />
+                        }
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className={cn('text-sm font-semibold', done ? 'text-gold-400' : active ? 'text-slate-200' : 'text-slate-600')}>{s.label}</p>
+                        {active && (
+                          <p className="text-[11px] text-slate-500 mt-0.5">{s.desc}</p>
+                        )}
+                        {/* Block counter for confirming */}
+                        {s.key === 'confirming' && active && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            {[1, 2, 3].map(b => (
+                              <div key={b} className={cn('w-4 h-1.5 rounded-full transition-all duration-300', blocks >= b ? 'bg-emerald-400' : 'bg-obsidian-700')} />
+                            ))}
+                            <span className="text-[10px] font-mono text-slate-500">{blocks}/3 blocks</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Success State — Token Card */}
+              <AnimatePresence>
+                {isComplete && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="bg-obsidian-900 border border-gold-500/20 rounded-xl p-5 space-y-4"
+                  >
+                    {/* Token info */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Token ID</p>
+                        <p className="text-2xl font-serif text-gold-400 mt-0.5">{MOCK_TOKEN_ID}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Standard</p>
+                        <p className="text-sm text-slate-200 font-mono mt-0.5">ERC-721</p>
+                      </div>
+                    </div>
+
+                    {/* Tx hash */}
+                    <div className="bg-obsidian-950 border border-obsidian-800 rounded-lg px-3 py-2.5 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-mono text-slate-400 truncate">{MOCK_TX_HASH.slice(0, 20)}…{MOCK_TX_HASH.slice(-8)}</span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button onClick={handleCopy} className="w-6 h-6 rounded-md bg-obsidian-800 hover:bg-obsidian-700 flex items-center justify-center transition-colors">
+                          {copied ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-500 hover:text-slate-300" />}
+                        </button>
+                        <button className="w-6 h-6 rounded-md bg-obsidian-800 hover:bg-obsidian-700 flex items-center justify-center transition-colors">
+                          <ExternalLink className="w-3 h-3 text-slate-500 hover:text-slate-300" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Network badge */}
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
+                      <span className="text-[11px] font-mono text-slate-400">Confirmed · Ethereum Mainnet · 3 blocks</span>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="space-y-2.5">
+                      {/* Pending badge */}
+                      <div className="flex items-center justify-center gap-2 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                        <ClipboardCheck className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-[11px] font-mono text-amber-400 uppercase tracking-widest">Pending Admin Approval</span>
+                      </div>
+                      <button
+                        onClick={() => { onClose(); navigate('/admin'); }}
+                        className="w-full py-3 bg-gradient-to-r from-gold-600 to-gold-400 text-obsidian-950 font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center gap-2"
+                      >
+                        <Zap className="w-4 h-4" />
+                        Go to Admin for Approval
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+}
+
+/* ─────────────────────────────────────────
+   Main Page
+   ───────────────────────────────────────── */
 export default function SubmitAsset() {
   const [step, setStep] = useState(1);
   const [fractionalize, setFractionalize] = useState(false);
   const [kycStatus, setKycStatus] = useState<'idle' | 'scanning' | 'verified'>('idle');
+  const [isMintOpen, setIsMintOpen] = useState(false);
 
   const steps = [
     { num: 1, title: 'Identity Verification', icon: Fingerprint },
@@ -264,13 +497,24 @@ export default function SubmitAsset() {
                 Next Step <ChevronRight className="w-4 h-4 ml-1" />
               </button>
             ) : (
-              <button className="primary-btn text-sm px-8 py-2.5 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-                Mint to Vault <CheckCircle2 className="w-4 h-4 ml-1" />
-              </button>
+              <motion.button
+                onClick={() => setIsMintOpen(true)}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="primary-btn text-sm px-8 py-2.5 shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_35px_rgba(212,175,55,0.5)] flex items-center gap-2"
+              >
+                <Zap className="w-4 h-4" />
+                Mint to Vault
+                <CheckCircle2 className="w-4 h-4" />
+              </motion.button>
             )}
           </div>
         </div>
       </div>
+
+      {/* Mint Modal */}
+      <MintModal isOpen={isMintOpen} onClose={() => setIsMintOpen(false)} />
+
     </PageTransition>
   );
 }
