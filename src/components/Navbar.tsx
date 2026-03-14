@@ -140,12 +140,12 @@ export default function Navbar() {
             <Link to="/" className="flex items-center gap-3 group shrink-0">
               <div className="relative">
                 <div className={cn(
-                  'w-9 h-9 rounded-lg flex items-center justify-center transition-shadow',
+                  'w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-105',
                   isDark
-                    ? 'bg-gradient-to-br from-gold-400 to-gold-700 shadow-[0_0_15px_rgba(212,175,55,0.35)] group-hover:shadow-[0_0_25px_rgba(212,175,55,0.55)]'
+                    ? 'bg-gradient-to-br from-gold-400 to-gold-700 shadow-[0_0_15px_rgba(212,175,55,0.35)] group-hover:shadow-[0_0_25px_rgba(212,175,55,0.65)] group-hover:ring-2 group-hover:ring-gold-500/50'
                     : 'bg-gradient-to-br from-gold-500 to-gold-800 shadow-[0_2px_12px_rgba(184,134,27,0.30)] group-hover:shadow-[0_4px_20px_rgba(184,134,27,0.45)]'
                 )}>
-                  <Vault className="text-white w-5 h-5" />
+                  <Vault className="text-obsidian-950 w-5 h-5 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110" />
                 </div>
               </div>
               <div className="leading-none">
@@ -217,13 +217,15 @@ export default function Navbar() {
                       <span className="text-[10px] font-mono text-slate-500 hidden xl:block">{wallet.address}</span>
                     </button>
                   ) : (
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setIsWalletModalOpen(true)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 text-sm transition-all font-medium"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 hover:bg-gold-500/5 text-sm transition-colors shadow-inner font-medium"
                     >
                       <Wallet className="w-3.5 h-3.5" />
                       Connect Wallet
-                    </button>
+                    </motion.button>
                   )}
 
                   {/* Profile button */}
@@ -327,20 +329,24 @@ export default function Navbar() {
               ) : (
                 /* Guest state: two CTAs side by side */
                 <div className="flex items-center gap-2">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setIsWalletModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 font-semibold text-sm rounded-lg transition-all"
+                    className="flex items-center gap-2 px-4 py-2 border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 hover:bg-gold-500/5 font-semibold text-sm rounded-lg transition-colors shadow-inner"
                   >
                     <Wallet className="w-4 h-4" />
                     Connect Wallet
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0px 0px 25px rgba(212,175,55,0.4)" }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/auth')}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold-600 to-gold-500 hover:from-gold-500 hover:to-gold-400 text-white font-semibold text-sm rounded-lg transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] hover:shadow-[0_0_25px_rgba(212,175,55,0.35)] active:scale-95"
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold-600 to-gold-500 text-obsidian-950 font-semibold text-sm rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.2)]"
                   >
                     <UserCircle className="w-4 h-4" />
                     Sign In
-                  </button>
+                  </motion.button>
                 </div>
               )}
             </div>

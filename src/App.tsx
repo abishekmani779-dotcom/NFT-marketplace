@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Profile from './pages/Profile';
+import { NoiseOverlay } from './components/ui/NoiseOverlay';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -43,6 +44,8 @@ function AppShell() {
         <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] bg-gold-600/5 rounded-full blur-[120px] transition-opacity duration-700" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-obsidian-700/10 rounded-full blur-[120px] transition-opacity duration-700" />
       </div>
+
+      <NoiseOverlay />
 
       <Navbar />
 

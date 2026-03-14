@@ -99,12 +99,6 @@ export default function Home() {
 
   // Stepper state
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
-  const stepperRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: stepperRef,
-    offset: ["start center", "end center"]
-  });
-  const lineWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   // Auto-advance
   useEffect(() => {
@@ -601,28 +595,47 @@ export default function Home() {
         </section>
 
         {/* ══════════════════════ HOW IT WORKS ══════════════════════ */}
-        <section ref={stepperRef} className="py-28 bg-obsidian-900 border-t border-obsidian-800 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-          <div className="max-w-6xl mx-auto px-6 md:px-10 lg:px-[100px] relative z-10">
+        <section className="py-32 bg-obsidian-950 border-t border-obsidian-800 relative overflow-hidden">
+          {/* Static Scanline Background */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(212,175,55,0.02)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none opacity-20" />
+          
+          <div className="max-w-7xl mx-auto px-6 md:px-10 lg:px-[100px] relative z-10">
             <FadeSection>
-              <motion.div variants={fadeUp} className="text-center mb-28">
-                <p className="text-xs text-gold-500 uppercase tracking-widest font-mono mb-3">The Process</p>
-                <h2 className="text-4xl md:text-5xl font-serif text-slate-50 mb-4">From Estate to Blockchain</h2>
-                <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">A rigorous, four-step pipeline that transforms physical antiques into fully verifiable, liquid digital assets.</p>
+              <motion.div variants={fadeUp} className="text-center mb-32">
+                <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-gold-500/20 bg-gold-500/5 mb-6">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold-500 animate-pulse" />
+                  <span className="text-[10px] text-gold-400 uppercase tracking-[0.2em] font-mono font-bold">The Protocol Pipeline</span>
+                </div>
+                <h2 className="text-5xl md:text-6xl font-serif text-slate-50 mb-6 tracking-tight">From Estate to <span className="italic text-gold-400">Blockchain</span></h2>
+                <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed font-light">
+                  A rigorous, multi-layered verification system that transforms physical heritage into high-liquidity digital assets.
+                </p>
               </motion.div>
             </FadeSection>
 
-            <div className="relative mt-12 mb-20 max-md:flex max-md:flex-col max-md:gap-16">
-              {/* Glowing Data Conduit (Track) - Desktop Only */}
-              <div className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-2 bg-obsidian-800/80 rounded-full overflow-hidden backdrop-blur-sm border border-obsidian-700/50" />
+            <div className="relative mt-12 mb-28">
+              {/* Central Conduit Path */}
+              <div className="hidden md:block absolute top-[60px] left-[0%] right-[0%] h-[1px] bg-gradient-to-r from-transparent via-obsidian-800 to-transparent" />
               
-              {/* Animated Progress Line */}
-              <motion.div 
-                className="hidden md:block absolute top-[60px] left-[10%] right-[10%] h-2 rounded-full origin-left bg-gradient-to-r from-gold-600 via-gold-400 to-amber-200 shadow-[0_0_20px_rgba(212,175,55,0.8)]"
-                style={{ scaleX: lineWidth }}
-              />
+              {/* Data Flow Particles (Constant Stream) */}
+              <div className="hidden md:block absolute top-[59px] left-[5%] right-[5%] h-[2px] w-[90%] pointer-events-none">
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ x: "-10%" }}
+                    animate={{ x: "110%" }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      delay: i * 1.3,
+                      ease: "linear"
+                    }}
+                    className="absolute top-0 w-20 h-full bg-gradient-to-r from-transparent via-gold-500/40 to-transparent"
+                  />
+                ))}
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 relative z-10 w-full justify-between">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-8 relative z-10">
                 {steps.map((step, idx) => {
                   const isHovered = hoveredStep === idx;
                   const isAnyHovered = hoveredStep !== null;
@@ -631,70 +644,73 @@ export default function Home() {
                   return (
                     <motion.div 
                       key={step.number} 
-                      initial={{ opacity: 0, y: 50 }}
+                      initial={{ opacity: 0, y: 30 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      transition={{ duration: 0.6, delay: idx * 0.15, type: 'spring', bounce: 0.4 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: idx * 0.1 }}
                       onMouseEnter={() => setHoveredStep(idx)}
                       onMouseLeave={() => setHoveredStep(null)}
-                      className="relative flex flex-col items-center text-center group cursor-default"
-                      style={{ opacity: isDimmed ? 0.3 : 1, scale: isHovered ? 1.05 : 1, transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                      className="relative flex flex-col items-center text-center group"
+                      style={{ 
+                        opacity: isDimmed ? 0.3 : 1, 
+                        transition: 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1)' 
+                      }}
                     >
-                      {/* Outline Background Number */}
-                      <span className="absolute -top-12 md:-top-16 text-8xl md:text-9xl font-bold text-transparent font-serif select-none pointer-events-none transition-all duration-500"
-                            style={{ WebkitTextStroke: '2px rgba(255, 255, 255, 0.03)', zIndex: -1 }}>
+                      {/* Giant Subtle Background Number */}
+                      <span className="absolute -top-16 md:-top-20 text-[10rem] font-bold text-transparent font-serif select-none pointer-events-none transition-all duration-700 opacity-20"
+                            style={{ WebkitTextStroke: '1px rgba(212, 175, 55, 0.15)' }}>
                         {step.number}
                       </span>
 
-                      {/* Glassmorphism Icon Pod */}
-                      <div className="w-28 h-28 md:w-[120px] md:h-[120px] rounded-full bg-obsidian-900/60 backdrop-blur-xl border border-obsidian-700 group-hover:border-gold-500 flex items-center justify-center mb-6 relative transition-all duration-500 z-10
-                        group-hover:shadow-[0_15px_40px_rgba(212,175,55,0.25)] shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
-                      >
-                        {/* Inner glowing circle */}
-                        <div className={`absolute inset-2 rounded-full border border-gold-500/0 group-hover:border-gold-500/30 bg-gradient-to-b from-obsidian-800 to-obsidian-950 transition-all duration-500 ${isHovered ? 'shadow-[inset_0_0_20px_rgba(212,175,55,0.2)]' : ''}`} />
+                      {/* Icon Container with Hover Glow */}
+                      <div className="relative mb-10">
+                        {/* Glow Pod behind icon */}
+                        <AnimatePresence>
+                          {isHovered && (
+                            <motion.div 
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1.2 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              className="absolute inset-0 bg-gold-500/20 blur-[30px] rounded-full"
+                            />
+                          )}
+                        </AnimatePresence>
 
-                        {idx === 2 && isHovered && (
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <motion.div animate={{ scale: [1, 1.8], opacity: [0.6, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }} className="absolute w-12 h-12 rounded-full border border-cyan-500/60" />
-                            <motion.div animate={{ scale: [1, 2.2], opacity: [0.4, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.3, ease: 'easeOut' }} className="absolute w-12 h-12 rounded-full border border-cyan-500/40" />
-                          </div>
-                        )}
-
-                        <step.icon className={`w-8 h-8 md:w-10 md:h-10 relative z-10 transition-colors duration-500 ${isHovered ? 'text-gold-300 drop-shadow-[0_0_15px_rgba(212,175,55,0.8)]' : 'text-gold-500'}`} />
-
-                        {idx === 3 && isHovered && (
-                          <motion.div 
-                            initial={{ x: '-150%', opacity: 0 }}
-                            animate={{ x: '150%', opacity: [0, 1, 0] }}
-                            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 pointer-events-none"
-                            style={{ clipPath: 'circle(50% at 50% 50%)' }}
-                          />
-                        )}
+                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-obsidian-900 border border-obsidian-800 flex items-center justify-center relative z-10 transition-all duration-500 group-hover:border-gold-500/50 group-hover:bg-obsidian-800 shadow-2xl">
+                          <step.icon className={`w-10 h-10 transition-all duration-500 ${isHovered ? 'text-gold-400 scale-110' : 'text-slate-400'}`} />
+                        </div>
                       </div>
                       
-                      {/* Estimate Time Badge */}
-                      <div className="inline-flex items-center justify-center mb-4">
-                        <span className="text-[10px] uppercase font-mono tracking-widest text-green-400 bg-green-900/20 border border-green-500/30 px-3 py-1 rounded-full">{step.time}</span>
+                      {/* Visual separator for mobile */}
+                      <div className="md:hidden w-px h-12 bg-gradient-to-b from-gold-500/50 to-transparent mb-6" />
+
+                      <div className="inline-flex items-center px-3 py-1 rounded-sm bg-obsidian-900 border border-obsidian-800 mb-4 group-hover:border-gold-500/30 transition-colors">
+                        <span className="text-[9px] uppercase font-mono tracking-widest text-gold-500/80">{step.time}</span>
                       </div>
 
-                      <h3 className="font-serif text-xl text-slate-100 mb-2 group-hover:text-gold-300 transition-colors">{step.title}</h3>
-                      <p className="text-slate-400 text-sm leading-relaxed max-w-[260px]">{step.desc}</p>
+                      <h3 className="font-serif text-2xl text-slate-50 mb-3 group-hover:text-gold-200 transition-colors tracking-tight">{step.title}</h3>
+                      <p className="text-slate-400 text-sm leading-relaxed max-w-[240px] font-light">
+                        {step.desc}
+                      </p>
                     </motion.div>
                   );
                 })}
               </div>
             </div>
 
-            <FadeSection className="mt-20 text-center">
-              <motion.div variants={fadeUp} className="relative inline-block group">
-                <div className="absolute -inset-2 bg-gradient-to-r from-gold-600 to-amber-400 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-                
-                <MagneticWrapper>
-                  <Link to="/submit" className="relative primary-btn inline-flex px-10 py-5 text-base rounded-xl bg-obsidian-950 hover:bg-obsidian-900 border border-gold-500/50 shadow-xl">
-                    Submit Your Artifact <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </MagneticWrapper>
+            <FadeSection className="mt-12 text-center">
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="relative inline-block"
+              >
+                <div className="absolute -inset-4 bg-gold-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Link 
+                  to="/submit" 
+                  className="relative px-12 py-5 bg-gold-500 text-obsidian-950 font-bold text-sm uppercase tracking-[0.2em] rounded-sm hover:bg-gold-400 transition-colors flex items-center gap-4 shadow-[0_10px_40px_rgba(212,175,55,0.3)]"
+                >
+                  Initiate Submission <ArrowRight className="w-5 h-5 flex-shrink-0" />
+                </Link>
               </motion.div>
             </FadeSection>
           </div>
