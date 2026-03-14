@@ -114,16 +114,16 @@ export default function AssetDetail() {
          <div className="absolute top-[10%] left-[50%] w-[50vw] h-[50vw] -translate-x-1/2 bg-gold-600/5 rounded-full blur-[150px]" />
       </div>
 
-      <div className="max-w-[90rem] mx-auto px-4 py-8">
+      <div className="max-w-[90rem] mx-auto px-4 py-8 lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden">
         <Link to="/browse" className="inline-flex items-center text-slate-muted hover:text-gold-400 font-sans text-sm mb-8 transition-colors group">
           <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
           Return to Registry
         </Link>
 
-        <div className="flex flex-col lg:flex-row gap-8 xl:gap-14">
+        <div className="flex flex-col lg:flex-row gap-8 xl:gap-14 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
           
           {/* Left Column: Media & Deep Details */}
-          <div className="flex-1 space-y-12">
+          <div className="flex-1 space-y-12 lg:overflow-y-auto lg:pr-6 custom-scroll pb-12">
             
             {/* Immersive Image Display */}
             <div className="space-y-4">
@@ -290,8 +290,8 @@ export default function AssetDetail() {
           </div>
 
           {/* Right Column: Order Panel & Data Accordions */}
-          <aside className="w-full lg:w-[420px] xl:w-[460px] shrink-0 space-y-8">
-            <div className="sticky top-24 space-y-6">
+          <aside className="w-full lg:w-[420px] xl:w-[460px] shrink-0 space-y-8 lg:overflow-y-auto lg:px-4 custom-scroll pb-12">
+            <div className="space-y-6">
                
                {/* Header Info */}
                <div>
