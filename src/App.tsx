@@ -7,11 +7,9 @@ import AssetDetail from './pages/AssetDetail';
 import SubmitAsset from './pages/SubmitAsset';
 import AdminDashboard from './pages/AdminDashboard';
 import SellerDashboard from './pages/SellerDashboard';
-import Auth from './pages/Auth';
-import { AnimatePresence, motion } from 'framer-motion';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
 import Profile from './pages/Profile';
+import { AnimatePresence } from 'framer-motion';
+import { AuthProvider } from './context/AuthContext';
 import { NoiseOverlay } from './components/ui/NoiseOverlay';
 
 function AnimatedRoutes() {
@@ -23,13 +21,10 @@ function AnimatedRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/asset/:id" element={<AssetDetail />} />
-        <Route path="/auth" element={<Auth />} />
-        
-        {/* Protected Routes */}
-        <Route path="/submit" element={<ProtectedRoute><SubmitAsset /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/seller" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/submit" element={<SubmitAsset />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/seller" element={<SellerDashboard />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </AnimatePresence>
   );

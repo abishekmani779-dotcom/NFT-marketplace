@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
-  Wallet, ShieldCheck, UserCircle, Menu, X, Coins,
-  Vault, ChevronDown, LogOut, Award, Hexagon, BarChart2, LayoutDashboard, Gavel
+  Wallet, Menu, X, Coins,
+  Vault, Hexagon, BarChart2, LayoutDashboard, Gavel
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,13 +15,11 @@ import { WalletModal } from './WalletModal';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const isDark = true;
   const location = useLocation();
-  const navigate = useNavigate();
-  const { isAuthenticated, user, logout, wallet, isWalletConnected } = useAuth();
+  const { wallet, isWalletConnected, disconnectWallet } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -29,26 +27,12 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close profile dropdown when clicking outside
-  useEffect(() => {
-    const close = () => setIsProfileDropdownOpen(false);
-    if (isProfileDropdownOpen) {
-      document.addEventListener('click', close);
-      return () => document.removeEventListener('click', close);
-    }
-  }, [isProfileDropdownOpen]);
-
   const navLinks = [
     { name: 'Browse',    path: '/browse', icon: Hexagon },
     { name: 'Mint',      path: '/submit', icon: Gavel },
     { name: 'Admin',     path: '/admin',  icon: LayoutDashboard },
     { name: 'Analytics', path: '/seller', icon: BarChart2 },
   ];
-
-  const handleDisconnect = () => {
-    logout();
-    setIsProfileDropdownOpen(false);
-  };
 
   /* ── Derived theme classes ── */
   const navBg = scrolled
@@ -198,156 +182,40 @@ export default function Navbar() {
               {/* Vertical divider */}
               <div className={cn('w-px h-6', dividerClass)} />
 
-              {isAuthenticated ? (
+              {/* Wallet pill — shows address/balance if connected, or Connect Wallet button */}
+              {isWalletConnected && wallet ? (
                 <div className="flex items-center gap-2">
-
-                  {/* Wallet pill — shows address if connected, or Connect Wallet btn */}
-                  {isWalletConnected && wallet ? (
-                    <button
-                      onClick={() => setIsWalletModalOpen(true)}
-                      className={cn('flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all hover:border-gold-500/40', balancePillClass)}
-                    >
-                      <svg viewBox="0 0 12 12" className="w-3 h-3 shrink-0" fill="none">
-                        <polygon points="6,0 9.5,5.5 6,7 2.5,5.5" fill="#627EEA" opacity="0.9"/>
-                        <polygon points="6,8.5 9.5,6 6,12 2.5,6" fill="#627EEA" opacity="0.6"/>
-                      </svg>
-                      <span className="font-mono font-medium">
-                        {wallet.balance} <span className={isDark ? 'text-slate-400' : 'text-slate2-500'}>ETH</span>
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-500 hidden xl:block">{wallet.address}</span>
-                    </button>
-                  ) : (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsWalletModalOpen(true)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 hover:bg-gold-500/5 text-sm transition-colors shadow-inner font-medium"
-                    >
-                      <Wallet className="w-3.5 h-3.5" />
-                      Connect Wallet
-                    </motion.button>
-                  )}
-
-                  {/* Profile button */}
-                  <div className="relative" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                      className={cn(
-                        'flex items-center gap-2.5 px-3 py-1.5 rounded-lg border transition-all duration-200',
-                        isProfileDropdownOpen ? profileBtnActive : profileBtnBase
-                      )}
-                    >
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm shrink-0" />
-                      <div className="flex flex-col items-start leading-none">
-                        <span className={cn('text-[10px] font-mono whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px]', isDark ? 'text-slate-500' : 'text-slate2-500')}>
-                          {user?.name || '0x8A2…c41F'}
-                        </span>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <Award className="w-2.5 h-2.5 text-gold-500" />
-                          <span className="text-[10px] font-semibold text-gold-500 capitalize">{user?.role || 'Elite'} Collector</span>
-                        </div>
-                      </div>
-                      <ChevronDown className={cn(
-                        'w-3.5 h-3.5 transition-transform duration-200 ml-1',
-                        isDark ? 'text-slate-400' : 'text-slate2-500',
-                        isProfileDropdownOpen && 'rotate-180'
-                      )} />
-                    </button>
-
-                    <AnimatePresence>
-                      {isProfileDropdownOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                          transition={{ duration: 0.15 }}
-                          className={cn(
-                            'absolute right-0 top-full mt-2 w-64 rounded-xl overflow-hidden border',
-                            dropdownClass
-                          )}
-                        >
-                          {/* Wallet info header */}
-                          <div className={cn('px-4 py-4', dropdownHeaderClass)}>
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md" />
-                              <div>
-                                <p className={cn('text-xs font-mono font-semibold', dropdownTextMain)}>{user?.name || 'Aura Collector'}</p>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <span className={cn('text-[10px]', dropdownSubText)}>Role:</span>
-                                  <span className={cn('text-xs font-semibold capitalize', dropdownTextMain)}>{user?.role || 'User'}</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className={cn('mt-3 flex items-center justify-between rounded-lg px-3 py-2 border', dropdownInnerCard)}>
-                              <div className="flex items-center gap-1.5">
-                                <Award className="w-3.5 h-3.5 text-gold-500" />
-                                <span className="text-xs text-gold-500 font-semibold">Elite Collector</span>
-                              </div>
-                              {isWalletConnected && wallet ? (
-                                <button onClick={() => { setIsProfileDropdownOpen(false); setIsWalletModalOpen(true); }} className="flex items-center gap-1 hover:opacity-80 transition-opacity">
-                                  <Coins className="w-3 h-3 text-gold-500" />
-                                  <span className={cn('text-xs font-mono', dropdownTextMain)}>{wallet.balance} ETH</span>
-                                </button>
-                              ) : (
-                                <button onClick={() => { setIsProfileDropdownOpen(false); setIsWalletModalOpen(true); }} className="text-[10px] text-gold-500 hover:text-gold-400 font-semibold transition-colors">
-                                  + Connect Wallet
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Menu items */}
-                          <div className="py-1.5">
-                            {[
-                              { icon: UserCircle, label: 'Profile Details',  desc: 'View your collector profile', path: '/profile' },
-                              { icon: ShieldCheck, label: 'KYC Verified',    desc: 'Identity confirmed ✓', color: 'text-green-500', path: '/auth' },
-                            ].map(({ icon: Icon, label, desc, color, path }) => (
-                              <Link to={path} key={label} onClick={() => setIsProfileDropdownOpen(false)} className={cn('w-full text-left px-4 py-2.5 transition-colors flex items-start gap-3 group', dropdownMenuItemHover)}>
-                                <Icon className={cn('w-4 h-4 mt-0.5 transition-colors shrink-0 group-hover:text-gold-500', color ?? (isDark ? 'text-slate-500' : 'text-slate2-500'))} />
-                                <div>
-                                  <p className={cn('text-sm group-hover:text-gold-600', dropdownTextMain)}>{label}</p>
-                                  <p className={cn('text-[10px]', dropdownSubText)}>{desc}</p>
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-
-                          <div className={cn('border-t py-1.5', isDark ? 'border-obsidian-800' : 'border-parchment-400')}>
-                            <button
-                              onClick={handleDisconnect}
-                              className="w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-red-50/50 dark:hover:bg-red-950/30 flex items-center gap-3 group"
-                            >
-                              <LogOut className="w-4 h-4 text-red-500/60 group-hover:text-red-400 transition-colors" />
-                              <span className="text-red-400/80 group-hover:text-red-400">Secure Logout</span>
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <button
+                    onClick={() => setIsWalletModalOpen(true)}
+                    className={cn('flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-all hover:border-gold-500/40', balancePillClass)}
+                  >
+                    <svg viewBox="0 0 12 12" className="w-3 h-3 shrink-0" fill="none">
+                      <polygon points="6,0 9.5,5.5 6,7 2.5,5.5" fill="#627EEA" opacity="0.9"/>
+                      <polygon points="6,8.5 9.5,6 6,12 2.5,6" fill="#627EEA" opacity="0.6"/>
+                    </svg>
+                    <span className="font-mono font-medium">
+                      {wallet.balance} <span className="text-slate-400">ETH</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-500 hidden xl:block">{wallet.address}</span>
+                  </button>
+                  <button
+                    onClick={disconnectWallet}
+                    className="p-1.5 rounded-lg border border-obsidian-700 bg-obsidian-900/70 text-slate-400 hover:text-red-400 hover:border-red-900/50 transition-colors"
+                    title="Disconnect wallet"
+                  >
+                    <Coins className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               ) : (
-                /* Guest state: two CTAs side by side */
-                <div className="flex items-center gap-2">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsWalletModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 hover:bg-gold-500/5 font-semibold text-sm rounded-lg transition-colors shadow-inner"
-                  >
-                    <Wallet className="w-4 h-4" />
-                    Connect Wallet
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05, boxShadow: "0px 0px 25px rgba(212,175,55,0.4)" }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate('/auth')}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold-600 to-gold-500 text-obsidian-950 font-semibold text-sm rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.2)]"
-                  >
-                    <UserCircle className="w-4 h-4" />
-                    Sign In
-                  </motion.button>
-                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsWalletModalOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 hover:bg-gold-500/5 font-semibold text-sm rounded-lg transition-colors shadow-inner"
+                >
+                  <Wallet className="w-4 h-4" />
+                  Connect Wallet
+                </motion.button>
               )}
             </div>
 
@@ -390,40 +258,32 @@ export default function Navbar() {
               </div>
 
               <div className={cn('px-4 pb-4 border-t pt-4', mobileFooterBorder)}>
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className={cn('flex items-center gap-3 px-4 py-3 rounded-lg border', mobileWalletCard)}>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0" />
+                {isWalletConnected && wallet ? (
+                  <div className={cn('flex items-center justify-between gap-3 px-4 py-3 rounded-lg border', mobileWalletCard)}>
+                    <div className="flex items-center gap-2">
+                      <svg viewBox="0 0 12 12" className="w-4 h-4 shrink-0" fill="none">
+                        <polygon points="6,0 9.5,5.5 6,7 2.5,5.5" fill="#627EEA" opacity="0.9"/>
+                        <polygon points="6,8.5 9.5,6 6,12 2.5,6" fill="#627EEA" opacity="0.6"/>
+                      </svg>
                       <div>
-                        <p className={cn('text-xs font-mono font-semibold', isDark ? 'text-slate-100' : 'text-slate2-800')}>{user?.name || '0x8A2…c41F'}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Award className="w-3 h-3 text-gold-500" />
-                          <span className="text-xs text-gold-500 font-semibold capitalize">{user?.role || 'Elite'} · 14.2 ETH</span>
-                        </div>
+                        <p className="text-xs font-mono font-semibold text-slate-100">{wallet.address}</p>
+                        <p className="text-xs text-gold-500 font-semibold">{wallet.balance} ETH</p>
                       </div>
                     </div>
                     <button
-                      onClick={handleDisconnect}
-                      className="w-full py-2.5 text-sm text-red-400 border border-red-900/50 rounded-lg bg-red-950/20 flex items-center justify-center gap-2 hover:bg-red-950/40 transition-colors"
+                      onClick={() => { setIsOpen(false); disconnectWallet(); }}
+                      className="text-xs text-red-400 border border-red-900/50 rounded-lg px-2 py-1 bg-red-950/20 hover:bg-red-950/40 transition-colors"
                     >
-                      <LogOut className="w-4 h-4" /> Sign Out
+                      Disconnect
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => { setIsOpen(false); setIsWalletModalOpen(true); }}
-                      className="w-full py-3 border border-obsidian-700 bg-obsidian-900 text-slate-300 font-bold rounded-lg flex items-center justify-center gap-2 hover:border-gold-500/40 hover:text-gold-400 active:scale-95 transition-all"
-                    >
-                      <Wallet className="w-4 h-4" /> Connect Wallet
-                    </button>
-                    <button
-                      onClick={() => { setIsOpen(false); navigate('/auth'); }}
-                      className="w-full py-3 bg-gradient-to-r from-gold-600 to-gold-500 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:from-gold-500 hover:to-gold-400 active:scale-95 transition-all"
-                    >
-                      <UserCircle className="w-4 h-4" /> Sign In
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => { setIsOpen(false); setIsWalletModalOpen(true); }}
+                    className="w-full py-3 border border-obsidian-700 bg-obsidian-900 text-slate-300 font-bold rounded-lg flex items-center justify-center gap-2 hover:border-gold-500/40 hover:text-gold-400 active:scale-95 transition-all"
+                  >
+                    <Wallet className="w-4 h-4" /> Connect Wallet
+                  </button>
                 )}
               </div>
             </motion.div>

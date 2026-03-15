@@ -1,12 +1,12 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
 import { PageTransition } from '../components/PageTransition';
-import { motion } from 'framer-motion';
-import { ShieldCheck, Award, Mail, Key, ShieldAlert, Hexagon, History, Eye, ArrowRight, ExternalLink } from 'lucide-react';
+import { ShieldCheck, Award, Mail, Key, ShieldAlert, Hexagon, History, ArrowRight, ExternalLink } from 'lucide-react';
 import { mockRegistry } from '../lib/mockRegistry';
 
+const COLLECTOR_NAME = 'Aura Collector';
+const COLLECTOR_ROLE = 'admin';
+
 export default function Profile() {
-  const { user } = useAuth();
   
   // Fake data for the portfolio UI
   const ownedAssets = mockRegistry.slice(0, 3);
@@ -35,8 +35,8 @@ export default function Profile() {
                     
                     <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg border-2 border-obsidian-700 mb-6" />
                     
-                    <h2 className="text-3xl font-serif text-slate-100">{user?.name}</h2>
-                    <p className="font-mono text-sm text-slate-500 mt-1 mb-8">Role: {user?.role.toUpperCase()}</p>
+                    <h2 className="text-3xl font-serif text-slate-100">{COLLECTOR_NAME}</h2>
+                    <p className="font-mono text-sm text-slate-500 mt-1 mb-8">Role: {COLLECTOR_ROLE.toUpperCase()}</p>
 
                     <div className="space-y-4 font-mono text-sm">
                         <div className="flex justify-between items-center bg-obsidian-950/80 p-3 rounded-xl border border-obsidian-800/80">
@@ -45,7 +45,7 @@ export default function Profile() {
                         </div>
                         <div className="flex justify-between items-center bg-obsidian-950/80 p-3 rounded-xl border border-obsidian-800/80">
                             <span className="text-slate-500 flex items-center gap-2"><Mail className="w-4 h-4" /> Email</span>
-                            <span className="text-slate-300">{user?.name.replace(' ', '.').toLowerCase()}@aura.link</span>
+                            <span className="text-slate-300">{COLLECTOR_NAME.replace(' ', '.').toLowerCase()}@aura.link</span>
                         </div>
                     </div>
                 </div>

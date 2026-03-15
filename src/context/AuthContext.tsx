@@ -3,12 +3,6 @@ import type { ReactNode } from 'react';
 
 export type WalletType = 'MetaMask' | 'Coinbase Wallet' | 'Phantom' | 'WalletConnect' | 'Ledger' | null;
 
-interface User {
-  id: string;
-  name: string;
-  role: 'admin' | 'user';
-}
-
 interface WalletInfo {
   type: WalletType;
   address: string;
@@ -16,14 +10,8 @@ interface WalletInfo {
 }
 
 interface AuthContextType {
-  user: User | null;
   wallet: WalletInfo | null;
-  isAuthenticated: boolean;
-  isOnboarded: boolean;
   isWalletConnected: boolean;
-  login: (userData: User, isNewUser?: boolean) => void;
-  logout: () => void;
-  completeOnboarding: () => void;
   connectWallet: (walletType: WalletType) => Promise<void>;
   disconnectWallet: () => void;
 }
@@ -40,27 +28,9 @@ const mockAddress = () => {
 const mockBalance = () => (Math.random() * 50 + 1).toFixed(2);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isOnboarded, setIsOnboarded] = useState<boolean>(false);
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
 
-  const login = (userData: User, isNewUser: boolean = false) => {
-    setUser(userData);
-    setIsOnboarded(!isNewUser);
-  };
-
-  const logout = () => {
-    setUser(null);
-    setIsOnboarded(false);
-    // Optionally keep wallet connected — just like real dApps
-  };
-
-  const completeOnboarding = () => {
-    setIsOnboarded(true);
-  };
-
   const connectWallet = async (walletType: WalletType): Promise<void> => {
-    // Simulate wallet connection delay
     await new Promise((resolve) => setTimeout(resolve, 1800));
     setWallet({
       type: walletType,
@@ -76,14 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
         wallet,
-        isAuthenticated: !!user,
-        isOnboarded,
         isWalletConnected: !!wallet,
-        login,
-        logout,
-        completeOnboarding,
         connectWallet,
         disconnectWallet,
       }}
