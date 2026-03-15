@@ -1,7 +1,21 @@
 import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-// Auth is removed — all routes are publicly accessible.
-// This component is kept as a passthrough to avoid breaking any imports.
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+export function ProtectedRoute({ children, requireAdmin = false }: {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+}) {
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  if (requireAdmin && user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
   return <>{children}</>;
 }

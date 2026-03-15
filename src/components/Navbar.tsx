@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Wallet, Menu, X, Coins,
-  Vault, Hexagon, BarChart2, LayoutDashboard, Gavel
+  Wallet, Menu, X, Coins, UserCircle, LogOut, Award,
+  Vault, ChevronDown, Hexagon, BarChart2, LayoutDashboard, Gavel
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,11 +15,13 @@ import { WalletModal } from './WalletModal';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const isDark = true;
   const location = useLocation();
-  const { wallet, isWalletConnected, disconnectWallet } = useAuth();
+  const navigate = useNavigate();
+  const { user, wallet, isAuthenticated, isWalletConnected, logout, disconnectWallet } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -27,12 +29,20 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const close = () => setIsProfileOpen(false);
+    if (isProfileOpen) { document.addEventListener('click', close); return () => document.removeEventListener('click', close); }
+  }, [isProfileOpen]);
+
   const navLinks = [
     { name: 'Browse',    path: '/browse', icon: Hexagon },
     { name: 'Mint',      path: '/submit', icon: Gavel },
     { name: 'Admin',     path: '/admin',  icon: LayoutDashboard },
     { name: 'Analytics', path: '/seller', icon: BarChart2 },
   ];
+
+  const handleLogout = () => { logout(); setIsProfileOpen(false); navigate('/'); };
 
   /* ── Derived theme classes ── */
   const navBg = scrolled
@@ -178,11 +188,9 @@ export default function Navbar() {
             {/* ── Right Side ── */}
             <div className="hidden lg:flex items-center gap-3">
               <CommandMenu />
-
-              {/* Vertical divider */}
               <div className={cn('w-px h-6', dividerClass)} />
 
-              {/* Wallet pill — shows address/balance if connected, or Connect Wallet button */}
+              {/* Wallet pill */}
               {isWalletConnected && wallet ? (
                 <div className="flex items-center gap-2">
                   <button
@@ -198,24 +206,87 @@ export default function Navbar() {
                     </span>
                     <span className="text-[10px] font-mono text-slate-500 hidden xl:block">{wallet.address}</span>
                   </button>
-                  <button
-                    onClick={disconnectWallet}
-                    className="p-1.5 rounded-lg border border-obsidian-700 bg-obsidian-900/70 text-slate-400 hover:text-red-400 hover:border-red-900/50 transition-colors"
-                    title="Disconnect wallet"
-                  >
+                  <button onClick={disconnectWallet} className="p-1.5 rounded-lg border border-obsidian-700 bg-obsidian-900/70 text-slate-400 hover:text-red-400 hover:border-red-900/50 transition-colors" title="Disconnect">
                     <Coins className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => setIsWalletModalOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 hover:bg-gold-500/5 font-semibold text-sm rounded-lg transition-colors shadow-inner"
+                  className="flex items-center gap-2 px-3 py-1.5 border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 font-semibold text-sm rounded-lg transition-colors"
                 >
-                  <Wallet className="w-4 h-4" />
-                  Connect Wallet
+                  <Wallet className="w-4 h-4" /> Connect Wallet
                 </motion.button>
+              )}
+
+              <div className={cn('w-px h-6', dividerClass)} />
+
+              {/* Auth section */}
+              {isAuthenticated && user ? (
+                <div className="relative" onClick={e => e.stopPropagation()}>
+                  <button
+                    onClick={() => setIsProfileOpen(p => !p)}
+                    className={cn(
+                      'flex items-center gap-2.5 px-3 py-1.5 rounded-lg border transition-all duration-200',
+                      isProfileOpen
+                        ? 'bg-obsidian-800 border-gold-500/40 shadow-[0_0_15px_rgba(212,175,55,0.1)]'
+                        : 'bg-obsidian-900 border-obsidian-700 hover:bg-obsidian-800 hover:border-obsidian-600'
+                    )}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shrink-0" />
+                    <div className="flex flex-col items-start leading-none">
+                      <span className="text-[10px] font-mono text-slate-400 max-w-[80px] truncate">{user.name}</span>
+                      <span className="text-[9px] font-semibold text-gold-500 capitalize mt-0.5 flex items-center gap-1">
+                        <Award className="w-2.5 h-2.5" /> {user.role === 'admin' ? 'Admin' : 'Collector'}
+                      </span>
+                    </div>
+                    <ChevronDown className={cn('w-3.5 h-3.5 text-slate-400 transition-transform duration-200', isProfileOpen && 'rotate-180')} />
+                  </button>
+
+                  <AnimatePresence>
+                    {isProfileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 top-full mt-2 w-56 rounded-xl border bg-obsidian-950 border-obsidian-700 shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden"
+                      >
+                        <div className="px-4 py-3 border-b border-obsidian-800 bg-gradient-to-r from-obsidian-900 to-obsidian-950">
+                          <p className="text-xs font-mono font-semibold text-slate-200">{user.name}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{user.email}</p>
+                        </div>
+                        <div className="py-1">
+                          <Link to="/profile" onClick={() => setIsProfileOpen(false)}
+                            className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-slate-300 hover:bg-obsidian-900 hover:text-gold-400 transition-colors">
+                            <UserCircle className="w-4 h-4" /> Profile
+                          </Link>
+                        </div>
+                        <div className="border-t border-obsidian-800 py-1">
+                          <button onClick={handleLogout}
+                            className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-red-400/80 hover:bg-red-950/30 hover:text-red-400 transition-colors">
+                            <LogOut className="w-4 h-4" /> Sign Out
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/auth')}
+                    className="flex items-center gap-2 px-3 py-1.5 border border-obsidian-700 bg-obsidian-900/70 text-slate-300 hover:border-gold-500/40 hover:text-gold-400 font-semibold text-sm rounded-lg transition-colors"
+                  >
+                    <UserCircle className="w-4 h-4" /> Sign In
+                  </motion.button>
+                  <motion.button whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(212,175,55,0.35)' }} whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/auth')}
+                    className="flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-gold-600 to-gold-500 text-obsidian-950 font-bold text-sm rounded-lg shadow-[0_0_12px_rgba(212,175,55,0.2)] transition-all"
+                  >
+                    Create Account
+                  </motion.button>
+                </div>
               )}
             </div>
 
@@ -258,33 +329,43 @@ export default function Navbar() {
               </div>
 
               <div className={cn('px-4 pb-4 border-t pt-4', mobileFooterBorder)}>
-                {isWalletConnected && wallet ? (
-                  <div className={cn('flex items-center justify-between gap-3 px-4 py-3 rounded-lg border', mobileWalletCard)}>
-                    <div className="flex items-center gap-2">
-                      <svg viewBox="0 0 12 12" className="w-4 h-4 shrink-0" fill="none">
-                        <polygon points="6,0 9.5,5.5 6,7 2.5,5.5" fill="#627EEA" opacity="0.9"/>
-                        <polygon points="6,8.5 9.5,6 6,12 2.5,6" fill="#627EEA" opacity="0.6"/>
-                      </svg>
-                      <div>
-                        <p className="text-xs font-mono font-semibold text-slate-100">{wallet.address}</p>
-                        <p className="text-xs text-gold-500 font-semibold">{wallet.balance} ETH</p>
+                <div className="space-y-2">
+                  {isWalletConnected && wallet ? (
+                    <div className={cn('flex items-center justify-between gap-3 px-4 py-3 rounded-lg border', mobileWalletCard)}>
+                      <div className="flex items-center gap-2">
+                        <svg viewBox="0 0 12 12" className="w-4 h-4 shrink-0" fill="none">
+                          <polygon points="6,0 9.5,5.5 6,7 2.5,5.5" fill="#627EEA" opacity="0.9"/>
+                          <polygon points="6,8.5 9.5,6 6,12 2.5,6" fill="#627EEA" opacity="0.6"/>
+                        </svg>
+                        <div>
+                          <p className="text-xs font-mono font-semibold text-slate-100">{wallet.address}</p>
+                          <p className="text-xs text-gold-500 font-semibold">{wallet.balance} ETH</p>
+                        </div>
                       </div>
+                      <button onClick={() => { setIsOpen(false); disconnectWallet(); }}
+                        className="text-xs text-red-400 border border-red-900/50 rounded-lg px-2 py-1 bg-red-950/20">
+                        Disconnect
+                      </button>
                     </div>
-                    <button
-                      onClick={() => { setIsOpen(false); disconnectWallet(); }}
-                      className="text-xs text-red-400 border border-red-900/50 rounded-lg px-2 py-1 bg-red-950/20 hover:bg-red-950/40 transition-colors"
-                    >
-                      Disconnect
+                  ) : (
+                    <button onClick={() => { setIsOpen(false); setIsWalletModalOpen(true); }}
+                      className="w-full py-3 border border-obsidian-700 bg-obsidian-900 text-slate-300 font-bold rounded-lg flex items-center justify-center gap-2 hover:border-gold-500/40 hover:text-gold-400 transition-all">
+                      <Wallet className="w-4 h-4" /> Connect Wallet
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => { setIsOpen(false); setIsWalletModalOpen(true); }}
-                    className="w-full py-3 border border-obsidian-700 bg-obsidian-900 text-slate-300 font-bold rounded-lg flex items-center justify-center gap-2 hover:border-gold-500/40 hover:text-gold-400 active:scale-95 transition-all"
-                  >
-                    <Wallet className="w-4 h-4" /> Connect Wallet
-                  </button>
-                )}
+                  )}
+
+                  {isAuthenticated ? (
+                    <button onClick={() => { setIsOpen(false); handleLogout(); }}
+                      className="w-full py-2.5 text-sm text-red-400 border border-red-900/50 rounded-lg bg-red-950/20 flex items-center justify-center gap-2 hover:bg-red-950/40 transition-colors">
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                  ) : (
+                    <button onClick={() => { setIsOpen(false); navigate('/auth'); }}
+                      className="w-full py-3 bg-gradient-to-r from-gold-600 to-gold-500 text-obsidian-950 font-bold rounded-lg flex items-center justify-center gap-2 active:scale-95 transition-all">
+                      <UserCircle className="w-4 h-4" /> Sign In / Register
+                    </button>
+                  )}
+                </div>
               </div>
             </motion.div>
           )}

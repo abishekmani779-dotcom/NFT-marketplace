@@ -179,6 +179,13 @@ function DeepDiveModal({ asset, onClose, onApprove, onReject }: {
   const [sealed, setSealed] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'metadata' | 'provenance'>('overview');
 
+  // Lock background scroll while modal is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   const handleApprove = () => {
     setSealed(true);
     setTimeout(() => { setSealed(false); onApprove(); }, 2800);
@@ -212,7 +219,7 @@ function DeepDiveModal({ asset, onClose, onApprove, onReject }: {
 
       {/* Modal */}
       <motion.div
-        className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-obsidian-700/80 bg-obsidian-950 shadow-[0_40px_120px_rgba(0,0,0,0.9)]"
+        className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl border border-obsidian-700/80 bg-obsidian-950 shadow-[0_40px_120px_rgba(0,0,0,0.9)]"
         initial={{ opacity: 0, scale: 0.88, y: 40 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.88, y: 40 }}
@@ -293,7 +300,7 @@ function DeepDiveModal({ asset, onClose, onApprove, onReject }: {
         </div>
 
         {/* Body */}
-        <div className="px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-8 py-6">
           <AnimatePresence mode="wait">
             {/* ── Overview Tab ── */}
             {activeTab === 'overview' && (
