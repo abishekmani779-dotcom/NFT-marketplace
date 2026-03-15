@@ -109,7 +109,7 @@ function UnicornEmbed() {
   return (
     <div
       data-us-project="WGMUtS1uEqfsXhemzHaJ"
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '100%', transform: 'scale(0.8)', transformOrigin: 'center' }}
     />
   );
 }
