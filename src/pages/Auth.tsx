@@ -108,7 +108,7 @@ function UnicornEmbed() {
 
   return (
     <div
-      data-us-project="ftH5IeBlcJOZCYDxPH57"
+      data-us-project="WGMUtS1uEqfsXhemzHaJ"
       style={{ width: '100%', height: '100%' }}
     />
   );
@@ -223,7 +223,7 @@ export default function Auth() {
   const isFormScreen = ['landing', 'signin', 'signup'].includes(screen);
 
   return (
-    <div className="h-screen overflow-hidden flex">
+    <div className="h-screen overflow-hidden flex p-[100px] gap-10">
       <Bg />
 
       {/* ══ LEFT column — video box ══ */}
