@@ -30,9 +30,7 @@ function AnimatedRoutes() {
         <Route path="/submit"  element={<ProtectedRoute><SubmitAsset /></ProtectedRoute>} />
         <Route path="/seller"  element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-
-        {/* Admin only */}
-        <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin"   element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
       </Routes>
     </AnimatePresence>
   );

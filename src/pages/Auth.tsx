@@ -91,7 +91,9 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, completeOnboarding } = useAuth();
-  const from = (location.state as any)?.from?.pathname ?? '/';
+  // Where to send after auth — fall back to /admin (not /) for new + returning users
+  const from = (location.state as any)?.from?.pathname;
+  const destination = (from && from !== '/') ? from : '/admin';
 
   const [screen, setScreen] = useState<Screen>('landing');
   const [loading, setLoading] = useState(false);
@@ -125,13 +127,12 @@ export default function Auth() {
     setLoading(true);
     await new Promise(r => setTimeout(r, 1400));
     setLoading(false);
-    // Mock: admin if contains "admin"
     login({
       id: 'u-001', name: siEmail.split('@')[0], email: siEmail,
-      role: siEmail.includes('admin') ? 'admin' : 'user',
+      role: 'admin',
       kycVerified: true, isOnboarded: true,
     });
-    navigate(from, { replace: true });
+    navigate(destination, { replace: true });
   };
 
   const handleSignUp = async () => {
@@ -143,7 +144,7 @@ export default function Auth() {
     // Store partial user, move to onboarding
     login({
       id: 'u-new', name: suName, email: suEmail,
-      role: 'user', kycVerified: false, isOnboarded: false,
+      role: 'admin', kycVerified: false, isOnboarded: false,
     });
     setScreen('onboard-identity');
   };
@@ -165,7 +166,7 @@ export default function Auth() {
     setLoading(false);
     completeOnboarding();
     setScreen('success');
-    setTimeout(() => navigate(from, { replace: true }), 2500);
+    setTimeout(() => navigate(destination, { replace: true }), 2500);
   };
 
   /* ── Background decoration ── */
