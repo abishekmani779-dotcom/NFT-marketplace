@@ -86,6 +86,34 @@ const slide = {
   transition: { duration: 0.22 },
 };
 
+/* ─── UnicornStudio Embed ────────────────────────────────────────── */
+function UnicornEmbed() {
+  React.useEffect(() => {
+    // Inject the script only once
+    if (!document.getElementById('unicorn-studio-script')) {
+      const s = document.createElement('script');
+      s.id  = 'unicorn-studio-script';
+      s.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.4/dist/unicornStudio.umd.js';
+      s.type = 'text/javascript';
+      s.onload = () => {
+        const us = (window as any).UnicornStudio;
+        if (us && us.init) us.init();
+      };
+      (document.head || document.body).appendChild(s);
+    } else {
+      const us = (window as any).UnicornStudio;
+      if (us && us.init) us.init();
+    }
+  }, []);
+
+  return (
+    <div
+      data-us-project="ftH5IeBlcJOZCYDxPH57"
+      style={{ width: '100%', height: '100%' }}
+    />
+  );
+}
+
 /* ─── Main Auth Page ─────────────────────────────────────────────── */
 export default function Auth() {
   const navigate = useNavigate();
@@ -195,7 +223,7 @@ export default function Auth() {
   const isFormScreen = ['landing', 'signin', 'signup'].includes(screen);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen overflow-hidden flex">
       <Bg />
 
       {/* ══ LEFT column — video box ══ */}
@@ -208,15 +236,12 @@ export default function Auth() {
             transition={{ duration: 0.5, ease: 'easeOut' }}
             className="hidden lg:flex w-1/2 items-center justify-center p-10"
           >
-            {/* Clean video box */}
-            <div className="w-full h-full max-h-[85vh] rounded-2xl overflow-hidden border border-obsidian-700/60 shadow-[0_0_60px_rgba(0,0,0,0.6)] relative">
-              {/* Gold top accent line */}
+            {/* UnicornStudio embed box */}
+            <div className="w-full h-full max-h-[85vh] rounded-2xl overflow-hidden border border-obsidian-700/60 shadow-[0_0_60px_rgba(0,0,0,0.5)] relative">
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-500/70 to-transparent z-10" />
-              <video
-                autoPlay muted loop playsInline
-                className="w-full h-full object-cover"
-                src="/intro.mp4"
-              />
+              <div className="absolute inset-0">
+                <UnicornEmbed />
+              </div>
             </div>
           </motion.div>
         )}
