@@ -223,7 +223,7 @@ export default function Auth() {
   const isFormScreen = ['landing', 'signin', 'signup'].includes(screen);
 
   return (
-    <div className="h-screen overflow-hidden flex">
+    <div className="h-[calc(100vh-80px)] overflow-hidden flex">
       <Bg />
 
       {/* ══ LEFT column — video box ══ */}

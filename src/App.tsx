@@ -48,9 +48,9 @@ function AppShell() {
       </div>
 
       <NoiseOverlay />
-      {!isAuth && <Navbar />}
+      <Navbar />
 
-      <main className={`flex-1 ${isAuth ? '' : 'mt-20'} z-10 w-full`}>
+      <main className="flex-1 mt-20 z-10 w-full">
         <AnimatedRoutes />
       </main>
 
