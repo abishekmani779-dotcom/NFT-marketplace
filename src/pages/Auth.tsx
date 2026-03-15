@@ -191,10 +191,16 @@ export default function Auth() {
     </div>
   );
 
+  /* ── Right-side video panel (always visible on landing/signin/signup) ── */
+  const isFormScreen = ['landing', 'signin', 'signup'].includes(screen);
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex">
       <Bg />
 
+      {/* ══ LEFT column — form ══ */}
+      <div className={`flex items-center justify-center px-8 py-12 transition-all duration-500 ${isFormScreen ? 'w-full lg:w-1/2' : 'w-full'}`}>
+        <div className="w-full max-w-md">
       <AnimatePresence mode="wait">
 
         {/* ══════════════════════════════════════════
@@ -553,6 +559,108 @@ export default function Auth() {
         )}
 
       </AnimatePresence>
+        </div>{/* end inner max-w */}
+      </div>{/* end left col */}
+
+      {/* ══ RIGHT column — video panel ══ */}
+      <AnimatePresence>
+        {isFormScreen && (
+          <motion.div
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 60 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="hidden lg:flex w-1/2 relative overflow-hidden"
+          >
+            {/* ── Video ── */}
+            <video
+              autoPlay muted loop playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+              src="/intro.mp4"
+            />
+
+            {/* Dark gradient overlay so text shows on top */}
+            <div className="absolute inset-0 bg-gradient-to-l from-transparent via-obsidian-950/30 to-obsidian-950/80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950/90 via-transparent to-obsidian-950/40" />
+
+            {/* Shimmering gold border on left edge */}
+            <div className="absolute left-0 inset-y-0 w-[2px] bg-gradient-to-b from-transparent via-gold-500/60 to-transparent" />
+
+            {/* ── Top label ── */}
+            <motion.div
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="absolute top-8 left-8 flex items-center gap-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-300/70">
+                Live Platform Preview
+              </span>
+            </motion.div>
+
+            {/* ── Bottom overlay content ── */}
+            <div className="absolute bottom-0 left-0 right-0 p-10">
+              {/* Glassmorphism card */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="relative rounded-2xl border border-white/10 bg-obsidian-950/60 backdrop-blur-xl p-6 overflow-hidden"
+              >
+                {/* Gold top line */}
+                <div className="absolute top-0 left-8 right-8 h-[1px] bg-gradient-to-r from-transparent via-gold-500/60 to-transparent" />
+
+                {/* Ambient glow */}
+                <div className="absolute -bottom-12 -right-12 w-40 h-40 rounded-full bg-gold-500/10 blur-[40px] pointer-events-none" />
+
+                <div className="mb-4">
+                  <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-gold-500/70 mb-2">
+                    Aura Protocol · v2.4
+                  </p>
+                  <h2 className="text-2xl font-serif text-slate-50 leading-snug">
+                    The Future of<br />
+                    <span className="text-gold-400">Physical Asset Ownership</span>
+                  </h2>
+                  <p className="text-sm text-slate-400 mt-2 leading-relaxed max-w-sm">
+                    Tokenize antiques, art, and collectibles with institutional-grade provenance authentication on the blockchain.
+                  </p>
+                </div>
+
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-4 mt-5 pt-5 border-t border-white/5">
+                  {[
+                    { label: 'Assets Vaulted', value: '2,841' },
+                    { label: 'Total TVL',       value: '$48.2M' },
+                    { label: 'Oracle Score',    value: '99.4%' },
+                  ].map(({ label, value }) => (
+                    <div key={label}>
+                      <p className="text-lg font-serif text-gold-400 leading-none">{value}</p>
+                      <p className="text-[10px] text-slate-500 font-mono mt-1">{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Bottom micro-badges */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+                className="flex items-center gap-3 mt-4"
+              >
+                {['ERC-721 · ERC-20', 'ISO 27001 Vault Partners', 'On-chain Provenance'].map(tag => (
+                  <span key={tag} className="px-3 py-1 text-[9px] font-mono uppercase tracking-widest rounded-full border border-white/10 bg-obsidian-950/40 text-slate-400 backdrop-blur-sm">
+                    {tag}
+                  </span>
+                ))}
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
+
