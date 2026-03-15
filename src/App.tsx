@@ -37,6 +37,9 @@ function AnimatedRoutes() {
 }
 
 function AppShell() {
+  const location = useLocation();
+  const isAuth = location.pathname === '/auth';
+
   return (
     <div className="min-h-screen relative font-sans flex flex-col transition-colors duration-700 ease-in-out bg-obsidian-950 text-slate-100">
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
@@ -45,19 +48,21 @@ function AppShell() {
       </div>
 
       <NoiseOverlay />
-      <Navbar />
+      {!isAuth && <Navbar />}
 
-      <main className="flex-1 mt-20 z-10 w-full">
+      <main className={`flex-1 ${isAuth ? '' : 'mt-20'} z-10 w-full`}>
         <AnimatedRoutes />
       </main>
 
-      <footer className="z-10 border-t py-8 relative transition-colors duration-500 bg-obsidian-950 border-obsidian-800">
-        <div className="max-w-7xl mx-auto px-4 text-center text-sm font-sans tracking-wide text-slate-muted">
-          © {new Date().getFullYear()} Aura Protocol.
-          <br />
-          Bridging Physical Provenance and Digital Ownership.
-        </div>
-      </footer>
+      {!isAuth && (
+        <footer className="z-10 border-t py-8 relative transition-colors duration-500 bg-obsidian-950 border-obsidian-800">
+          <div className="max-w-7xl mx-auto px-4 text-center text-sm font-sans tracking-wide text-slate-muted">
+            © {new Date().getFullYear()} Aura Protocol.
+            <br />
+            Bridging Physical Provenance and Digital Ownership.
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
